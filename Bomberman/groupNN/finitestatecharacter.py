@@ -33,10 +33,10 @@ class FiniteStateCharacter(CharacterEntity):
         # True if there is an impassable wall within 1 space,
         # False otherwise
         isThereWall = self.impassableWall(wrld, meX, meY)
-        # True if there is at least 1 bomb within 2 steps
+        # True if there is at least 1 bomb within a + shaped area
         isThereBomb = self.isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
-        isThereMonster = self.isThereMonster(closeObjects)
+        isThereMonster = self.isThereMonster(wrld, meX, meY)
         # True if there is at least 1 explosion within 2 steps
         isThereExplosion = self.isThereExplosion(closeObjects)
 
@@ -147,33 +147,19 @@ class FiniteStateCharacter(CharacterEntity):
 
         return isThereBomb
 
-    def isThereWall(self, closeObjects):
-        # Use the established list of objects within the perimeter to see if
-        # there is a wall nearby
-        isThereWall = False
-
-        # Extract all the bombs
-        wlls = [item for item in closeObjects if item[0] == 0]
-
-        # If there are bombs, set isThereWall to True
-        if len(wlls):
-            isThereWall = True
-
-        return isThereWall
-
-    def isThereMonster(self, closeObjects):
-        # Use the established list of objects within the perimeter to see if
-        # there is a wall nearby
-        isThereMonster = False
-
-        # Extract all the bombs
-        mnstrs = [item for item in closeObjects if item[0] == 2]
-
-        # If there are bombs, set isThereMonster to True
-        if len(mnstrs):
-            isThereMonster = True
-
-        return isThereMonster
+    def isThereMonster(self, wrld, meX, meY):
+        # Go through each space in the box around the character
+        for i in range(-2,2):
+            for j in range(-2,2):
+                # if this is not the space the character is in
+                if i != 0 and j != 0:
+                    # if the postition is in world bounds
+                    if not meX + i >= wrld.width() and meX + i <= 0 and meY + j >= wrld.height() and meY + j <= 0:
+                        # if there is a monster within the bounds, return true
+                        if wrld.monsters_at(meX + i, meY + j):
+                            return True
+        # If a monster hasn't been found, return false
+        return False
 
     def isThereExplosion(self, closeObjects):
         # Use the established list of objects within the perimeter to see if
