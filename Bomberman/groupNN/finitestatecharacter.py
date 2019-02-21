@@ -34,7 +34,7 @@ class FiniteStateCharacter(CharacterEntity):
         # False otherwise
         isThereWall = self.impassableWall(wrld, meX, meY)
         # True if there is at least 1 bomb within a + shaped area
-        isThereBomb = self.isThereBomb(closeObjects)
+        isThereBomb = self.isThereBomb(wrld, meX, meY)
         # True if there is at least 1 monster within 2 steps
         isThereMonster = self.isThereMonster(wrld, meX, meY)
         # True if there is at least 1 explosion within 2 steps
@@ -133,19 +133,32 @@ class FiniteStateCharacter(CharacterEntity):
 
         return isThereWall
 
-    def isThereBomb(self, closeObjects):
-        # Use the established list of objects within the perimeter to see if
-        # there is a bomb nearby
-        isThereBomb = False
+    def isThereBomb(self, wrld, meX, meY):
+        # Go through each space in the box around the character
+        for i in range(-wrld.expl_range, -1):
+            # if the postition is in world bounds
+            if not meX + i >= wrld.width() and meX + i <= 0:
+                # check if there is a bomb there and append if so
+                if wrld.bomb_at(meX + i, meY):
+                    return True
+            if not meY + i >= wrld.height() and meY + i <= 0:
+                # check if there is a bomb there and append if so
+                if wrld.bomb_at(meX, meY + i):
+                    return True
 
-        # Extract all the bombs
-        bmbs = [item for item in closeObjects if item[0] == 1]
+        # Go through each space in the box around the character
+        for j in range(1, wrld.expl_range):
+            # if the postition is in world bounds
+            if not meX + j >= wrld.width() and meX + j <= 0:
+                # check if there is a bomb there and append if so
+                if wrld.bomb_at(meX + j, meY):
+                    return True
+            if not meY + j >= wrld.height() and meY + j <= 0:
+                # check if there is a bomb there and append if so
+                if wrld.bomb_at(meX, meY + j):
+                    return True
 
-        # If there are bombs, set isThereBomb to True
-        if len(bmbs):
-            isThereBomb = True
 
-        return isThereBomb
 
     def isThereMonster(self, wrld, meX, meY):
         # Go through each space in the box around the character
