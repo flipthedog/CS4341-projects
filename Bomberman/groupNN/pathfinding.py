@@ -96,6 +96,23 @@ def greedyBFS(start, end, wrld,w):
                             #append to the fronter
                             notEvaluated.append((manhattandist(current, endcell), current))
 
+# HeadToExit(start, exit, wrld)
+# Return the cell to head directly to the exit
+# start: Start cell
+# exit: Exit cell
+# wrld: World object
+def HeadToExit(start, exit, wrld):
+
+    startX = start[0]
+    startY = start[1]
+    exitX = exit[0]
+    exitY = exit[1]
+
+    directionX = (exitX - startX) / abs(exitX - startX)
+    directionY = (exitY - startY) / abs(exitY - startY)
+
+    return [startX + directionX, startY + directionY]
+
 
 #manhattandist(gridcell, gridcell)
 #given 2 gridcells, use the current position of each to calculate the abs net manhattan distance
