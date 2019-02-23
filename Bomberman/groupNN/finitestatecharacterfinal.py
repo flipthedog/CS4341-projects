@@ -8,6 +8,11 @@ sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
 from colorama import Fore, Back
+#
+# We need to:
+# 1) Figure out how to widen paths
+# 2) Improve bomb avoidance so that it's not hardcoded
+# 3) Deal with bombs and explosions in expectiMax
 
 class FiniteStateCharacter(CharacterEntity):
 
@@ -107,17 +112,20 @@ class FiniteStateCharacter(CharacterEntity):
     def isThereMonster(self, wrld, meX, meY):
             # All of the monsters
             m = wrld.monsters.items()
+            print(m)
 
             # Filtering only close monsters
             for x,monstr in m:
-                if self.MoveDist([meX, meY], [monstr.x, monstr.y]) <= 5:
-                    return True
-            return False
+                ms = monstr
+                for ms in monstr:
+                    if self.MoveDist([meX, meY], [ms.x, ms.y]) <= 3:
+                        return True
+                return False
 
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.expectiMax(wrld, 2)
+        goTo = EM.expectiMax(wrld, 1)
 
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
