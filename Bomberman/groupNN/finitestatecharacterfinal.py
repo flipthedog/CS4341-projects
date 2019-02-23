@@ -13,6 +13,8 @@ from colorama import Fore, Back
 # 1) Figure out how to widen paths
 # 2) Improve bomb avoidance so that it's not hardcoded
 # 3) Deal with bombs and explosions in expectiMax
+# 4) Higher level algorithms
+
 
 class FiniteStateCharacter(CharacterEntity):
 
@@ -46,37 +48,28 @@ class FiniteStateCharacter(CharacterEntity):
 
         if isThereBomb and isThereMonster and isThereExplosion:
             # There at least 1 bomb, 1 monster, and 1 explosion within the danger zone
-            print("all")
-            self.greedy(wrld, exit, meX, meY)
+            self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster:
-            # There is both at least 1 bomb and 1 monster within 2 steps
-            print("bomb & monster")
-            self.greedy(wrld, exit, meX, meY)
+            self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb and isThereExplosion:
             # There is both at least 1 bomb and 1 explosion within 2 steps
-            print("bomb & exp")
-            self.greedy(wrld, exit, meX, meY)
+            self.move(-1,-1)
         elif isThereExplosion and isThereMonster:
             # There is both at least 1 explosion and 1 monster within 2 steps
-            print("exp & monster")
-            self.greedy(wrld, exit, meX, meY)
+            self.expectimax(wrld, exit, meX, meY)
         elif isThereMonster:
             # There is at least 1 monster within 2 steps
-            print("here")
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
-            print("bomb")
             self.move(-1,-1)
             # There is at least 1 bomb within 2 steps
             # self.greedy(wrld, exit, meX, meY)
         elif isThereExplosion:
-            print("explosion")
             self.move(-1,-1)
             # There is at least 1 explosion within 2 steps
             # TODO: eliminate this case, handle in greedy
             # self.greedy(wrld, exit, meX, meY)
         else:
-            print("everything is fine")
             # There is no danger nearby
             self.greedy(wrld, exit, meX, meY)
 
@@ -112,7 +105,6 @@ class FiniteStateCharacter(CharacterEntity):
     def isThereMonster(self, wrld, meX, meY):
             # All of the monsters
             m = wrld.monsters.items()
-            print(m)
 
             # Filtering only close monsters
             for x,monstr in m:
