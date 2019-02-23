@@ -60,13 +60,18 @@ class FiniteStateCharacter(CharacterEntity):
             print("here")
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
+            print("bomb")
+            self.move(-1,-1)
             # There is at least 1 bomb within 2 steps
-            self.greedy(wrld, exit, meX, meY)
+            # self.greedy(wrld, exit, meX, meY)
         elif isThereExplosion:
+            print("explosion")
+            self.move(-1,-1)
             # There is at least 1 explosion within 2 steps
             # TODO: eliminate this case, handle in greedy
-            self.greedy(wrld, exit, meX, meY)
+            # self.greedy(wrld, exit, meX, meY)
         else:
+            print("everything is fine")
             # There is no danger nearby
             self.greedy(wrld, exit, meX, meY)
 
@@ -76,43 +81,37 @@ class FiniteStateCharacter(CharacterEntity):
         return max(abs(start[0] - end[0]), abs(start[1] - end[1]))
 
     def isThereBomb(self, wrld, meX, meY):
+        bmbs = []
         # List of bombs across the entire board
-        try:
-            bombs = next(iter(wrld.bombs.values()))
-            return bombs
-        except StopIteration:
-            return None
+        bombs = world.explosion.items()
+        for x,bmb in bombs:
+            bmbs.append(bmb)
+        return bmbs
 
     def isThereExplosion(self, wrld, meX, meY):
-        try:
-            # Returns all of the close explosions
-            exps = []
+        # Returns all of the close explosions
+        exps = []
 
-            # All of the explosions
-            e = next(iter(wrld.explosions.values()))
+        # All of the explosions
+        e = wrld.explosions.items()
 
-            # Filtering only close monsters
-            for exp in e:
-                if self.MoveDist([meX, meY], [exp.x, exp.y]) <= 1:
-                    exps.append(exp)
+        # Filtering only close monsters
+        for x,exp in e:
+            if self.MoveDist([meX, meY], [exp.x, exp.y]) <= 1:
+                exps.append(exp)
 
-            return exps
-        except StopIteration:
-            return None
+        return exps
 
 
     def isThereMonster(self, wrld, meX, meY):
-        try:
-            # All of the monsters
-            m = next(iter(wrld.monsters.values()))
+        # All of the monsters
+        m = wlrd.monsters.items()
 
-            # Filtering only close monsters
-            for monstr in m:
-                if self.MoveDist([meX, meY], [monstr.x, monstr.y]) <= 5:
-                    return True
-            return False
-        except StopIteration:
-            return False
+        # Filtering only close monsters
+        for x,monstr in m:
+            if self.MoveDist([meX, meY], [monstr.x, monstr.y]) <= 5:
+                return True
+        return False
 
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm

@@ -8,7 +8,7 @@ from game import Game
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
-from greedycharacterS2 import GreedyCharacter
+from finitestatecharacterfinal import FiniteStateCharacter
 
 
 
@@ -16,7 +16,7 @@ from greedycharacterS2 import GreedyCharacter
 g = Game.fromfile('map.txt')
 
 # TODO Add your character
-g.add_character(GreedyCharacter("me", # name
+g.add_character(FiniteStateCharacter("me", # name
                               "C",  # avatar
                               0, 0  # position
 ))
