@@ -53,7 +53,7 @@ class FiniteStateCharacter(CharacterEntity):
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb and isThereExplosion:
             # There is both at least 1 bomb and 1 explosion within 2 steps
-            self.move(-1,-1)
+            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
         elif isThereExplosion and isThereMonster:
             # There is both at least 1 explosion and 1 monster within 2 steps
             self.expectimax(wrld, exit, meX, meY)
@@ -62,9 +62,9 @@ class FiniteStateCharacter(CharacterEntity):
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
             # There is at least 1 bomb within 2 steps
-            self.move(-1,-1)
+            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
         elif isThereExplosion:
-            self.move(-1,-1)
+            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
         else:
             # There is no danger nearby
             self.greedy(wrld, exit, meX, meY)
@@ -136,3 +136,61 @@ class FiniteStateCharacter(CharacterEntity):
         else:
             #move in direction to get to x,y found in prev step
             self.move(-meX + goTo[0], -meY + goTo[1])
+
+    def avoidanceNoMster(self, wrld, exit, meX, meY, bmbs, exps):
+        # Check if there are bombs
+        if bmbs and not exps:
+            # Advance the bomb one tick
+            try:
+                m = next(iter(wrld.monsters.values()))[0]
+                m.move(0,0)
+                wrld.characters = {}
+                (newwrld, events) = wrld.next()
+                wrld = newwrld
+            except StopIteration:
+                wrld.characters = {}
+                (newwrld, events) = wrld.next()
+                wrld = newwrld
+            # See if there are explosions now
+            exps = []
+
+            # All of the explosions
+            e = wrld.explosions.items()
+
+            # Filtering only close monsters
+            for x,exp in e:
+                if self.MoveDist([meX, meY], [exp.x, exp.y]) <= 1:
+                    exps.append(exp)
+            if not exps:
+                exps = None
+        # Check if there are any explosions
+        if exps is not None:
+            # If so,
+            # Figure out which explosion cell is the closest
+            clstOne = 0
+            clstOneDist = 5000
+            for e in exps:
+                dist = abs(meX - e.x) + abs(meY - e.y)
+                if  dist < clstOneDist:
+                    clstOne = e
+                    clstOneDist = dist
+            if abs(meX-clstOne.x) == 0 or abs(meY-clostOne.Y) == 0:
+                # Move to the closest open space
+                moveTo = ()
+                for i in range(-1, 1):
+                    for j in range(-1, 1):
+                        # If not current position
+                        if i != 0 and j != 0:
+                            # If within bounds:
+                            if not (meX + i >= wrld.width() or meX + i < 0 or meY + j >= wrld.height() or meY + j < 0):
+                                if not wrld.explosion_at(meX + i, meY + j) and not wrld.wall_at(meX + i, meY + j):
+                                        # Save the space
+                                        moveTo = (i, j)
+                # Move to last saved space
+                self.move(moveTo[0], moveTo[1])
+            else:
+                # Move 1 step in the opposite direction from the explosion cell
+                self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clostOne.x), -(1/abs(meY-clostOne.Y)) * abs(meY-clostOne.Y))
+        else:
+            # If not, continue with traditional greedy
+            self.greedy(wrld, exit, meX, meY)
