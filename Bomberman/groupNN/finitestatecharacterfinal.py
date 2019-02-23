@@ -83,7 +83,8 @@ class FiniteStateCharacter(CharacterEntity):
     def isThereBomb(self, wrld, meX, meY):
         bmbs = []
         # List of bombs across the entire board
-        bombs = world.explosion.items()
+        bombs = wrld.bombs.items()
+
         for x,bmb in bombs:
             bmbs.append(bmb)
         return bmbs
@@ -104,14 +105,14 @@ class FiniteStateCharacter(CharacterEntity):
 
 
     def isThereMonster(self, wrld, meX, meY):
-        # All of the monsters
-        m = wlrd.monsters.items()
+            # All of the monsters
+            m = wrld.monsters.items()
 
-        # Filtering only close monsters
-        for x,monstr in m:
-            if self.MoveDist([meX, meY], [monstr.x, monstr.y]) <= 5:
-                return True
-        return False
+            # Filtering only close monsters
+            for x,monstr in m:
+                if self.MoveDist([meX, meY], [monstr.x, monstr.y]) <= 5:
+                    return True
+            return False
 
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
@@ -133,7 +134,6 @@ class FiniteStateCharacter(CharacterEntity):
             # TODO: Improve bomb placement and pathfinding combinations
             goTo = conn4.getNextStep([meX, meY], exit, wrld)
             if wrld.wall_at(goTo[0],goTo[1]):
-                NotSetThisTime = False
                 self.place_bomb()
             else:
                 self.move(-meX + goTo[0], -meY + goTo[1])
