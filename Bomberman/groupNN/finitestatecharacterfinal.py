@@ -61,14 +61,10 @@ class FiniteStateCharacter(CharacterEntity):
             # There is at least 1 monster within 2 steps
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
-            self.move(-1,-1)
             # There is at least 1 bomb within 2 steps
-            # self.greedy(wrld, exit, meX, meY)
+            self.move(-1,-1)
         elif isThereExplosion:
             self.move(-1,-1)
-            # There is at least 1 explosion within 2 steps
-            # TODO: eliminate this case, handle in greedy
-            # self.greedy(wrld, exit, meX, meY)
         else:
             # There is no danger nearby
             self.greedy(wrld, exit, meX, meY)
