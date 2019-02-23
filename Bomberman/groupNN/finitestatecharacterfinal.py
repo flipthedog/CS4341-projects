@@ -1,6 +1,7 @@
 # This is necessary to find the main code
 import sys
 import pathfinding as greedyBFS
+import pathfinding4conn as conn4
 import expectimaxV4 as EM
 
 sys.path.insert(0, '../bomberman')
@@ -40,18 +41,23 @@ class FiniteStateCharacter(CharacterEntity):
 
         if isThereBomb and isThereMonster and isThereExplosion:
             # There at least 1 bomb, 1 monster, and 1 explosion within the danger zone
+            print("all")
             self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster:
             # There is both at least 1 bomb and 1 monster within 2 steps
+            print("bomb & monster")
             self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereExplosion:
             # There is both at least 1 bomb and 1 explosion within 2 steps
+            print("bomb & exp")
             self.greedy(wrld, exit, meX, meY)
         elif isThereExplosion and isThereMonster:
             # There is both at least 1 explosion and 1 monster within 2 steps
+            print("exp & monster")
             self.greedy(wrld, exit, meX, meY)
         elif isThereMonster:
             # There is at least 1 monster within 2 steps
+            print("here")
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
             # There is at least 1 bomb within 2 steps
@@ -126,7 +132,7 @@ class FiniteStateCharacter(CharacterEntity):
 
         if goTo is None:
             # TODO: Improve bomb placement and pathfinding combinations
-            goTo = greedyBFS.getNextStep([meX, meY], exit, wrld,0)
+            goTo = conn4.getNextStep([meX, meY], exit, wrld)
             if wrld.wall_at(goTo[0],goTo[1]):
                 NotSetThisTime = False
                 self.place_bomb()
