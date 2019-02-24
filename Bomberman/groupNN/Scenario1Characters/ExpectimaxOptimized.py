@@ -125,7 +125,7 @@ def moveDist(m, c):
 def cost(wrld, m, c, Exit, D, DMax):
 
     cost = 0
-    #cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))
+    cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))
     # Elen = greedyBFS.getPathLen([c.x, c.y], Exit, wrld)
     # if Elen is not None:
     #     cost += -Elen*.5
@@ -134,16 +134,21 @@ def cost(wrld, m, c, Exit, D, DMax):
     #set Monster cost, trigger high value for death, and early death
 
     if m is not None:
-        if moveDist(m, c) <= 1:
+
+        currRange = max(abs(m.x - c.x), abs(m.y - c.y))
+        if (currRange <= 1 and m.rnge !=0) or currRange <= 0:
             return -100**(DMax+2-D)
 
-        cost += - 5 ** (4 - moveDist(m, c)) - 100 ** (8 - len(find_actions_OpObj(wrld, c)))
+        if currRange <= m.rnge:
+            cost += - 5 ** (4 - moveDist(m, c)) #- 0 ** (8 - len(find_actions_OpObj(wrld, c)))
 
 
   # ________________________________________________________________________________#
     #if at the exit w/o death, nice, choose this
-    if c.x == Exit[0] and c.y == Exit[1]:
-        return 1
+
+    if max(abs(Exit[0] - c.x), abs(Exit[1] - c.y)) <=2:
+        #print("ahhh", c.x, c.y, abs(Exit[0] - c.x), abs(Exit[0] - c.y))
+        return 1000
 
     return cost
 
