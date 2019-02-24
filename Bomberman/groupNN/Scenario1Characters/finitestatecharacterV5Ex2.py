@@ -37,11 +37,17 @@ class FiniteStateCharacter(CharacterEntity):
         # True if there is at least 1 bomb within 2 steps
         isThereBomb = self.isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
-        m = next(iter(wrld.monsters.values()))[0]
-        if self.MoveDist([meX, meY], [m.x, m.y]) <= 3:
-            isThereMonster = True#self.isThereMonster(closeObjects)
-        else:
-            isThereMonster = False
+        mlist = wrld.monsters.values()
+        isThereMonster = False
+        for mon in mlist:
+            for m in mon:
+                try:
+                    rnge = m.rnge - 1
+                except:
+                    rnge = 0
+                if self.MoveDist([meX, meY], [m.x, m.y]) <= 3+rnge:
+                    isThereMonster = True#self.isThereMonster(closeObjects)
+
         # True if there is at least 1 explosion within 2 steps
         isThereExplosion = self.isThereExplosion(closeObjects)
 
@@ -200,7 +206,6 @@ class FiniteStateCharacter(CharacterEntity):
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-
         goTo = EM.expectiMax(wrld, exit, 2, {})
 
         # move in direction to get to x,y found in prev step

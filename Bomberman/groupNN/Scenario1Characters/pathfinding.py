@@ -30,6 +30,23 @@ def getNextStep(start, end, wrld):
     #return the position just after the start position
     return prev
 
+def getPathLen(start, end, wrld):
+    #Call pathing algorithm, returns Gridcell with complete path to be reconstructed
+    pathNode = greedyBFS(start, end, wrld, 1)
+
+
+    pathLen = 0
+    #reverse order of the graph by following camefrom obj until reaching the start position.
+    #use this to find the positon that comes just after the start position
+    while pathNode is not None and pathNode.current is not start:
+        pathNode = pathNode.camefrom
+        pathLen+=1
+    if pathNode is None:
+        return None
+    #return the position just after the start position
+    return pathLen
+
+
 #greedyBFS([x,y], [x,y], world)->gridcell
 #Given a start tuple (usually players's start) [x,y], end tuple [x,y] and the world
 #Return a gridcell at the goal. The <gridcell>.camefrom can be used to assemble the path to the goal

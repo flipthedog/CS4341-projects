@@ -1,18 +1,14 @@
 import sys
 import time
+import pathfinding as greedyBFS
 #############################################################################################
 #expectiMax(World, Character, MonsterList, [int xf, int yf], int)-> [int xOp, int yOp]
 #Given a world, ticked for any bombs, a character, a monsterlist of size 1 or 2 (as there is a max of 2 monsters)
 #a positional tuple of the exit, and the max depth to reach. The depth will early exit in the case of succsess (reaching
 #the exit) and failure (death)
-Calls = 0
-
-
-def expectiMax(wrld, Exit, Depth):
+def expectiMax(wrld, Exit, Depth, CostLookup):
   #________________________________________________________________________________#
     #Set up charicter placement, converting charicters to optimized charicters
-    global Calls
-    Calls = 0
     Mlist = []
     t = time.time()
     for monList in wrld.monsters.values():
@@ -32,7 +28,7 @@ def expectiMax(wrld, Exit, Depth):
         try:
             rnge = Mlist[0].rnge
         except:
-            rnge = 0
+            rnge = 2
         m1 = OpMonster(Mlist[0].x, Mlist[0].y, rnge)
 
 
@@ -41,7 +37,7 @@ def expectiMax(wrld, Exit, Depth):
             try:
                 rnge = Mlist[1].rnge
             except:
-                rnge = 0
+                rnge = 2
             m2 = OpMonster(Mlist[1].x, Mlist[1].y, rnge)
 
 
@@ -64,16 +60,20 @@ def expectiMax(wrld, Exit, Depth):
     #for every action possible, make a move then choose arg max
 
     BestAction = [-(sys.maxsize - 1), c]
-    for mon2 in m2List:
-        for mon1 in m1List:
-            for char in cList:
-                v = expVal(wrldList[1:], mon1, mon2, char, Exit, 0, Depth)
-                Calls+=1
-                if v > BestAction[0]:
-                    BestAction = [v, char]
+
+
+    for char in cList:
+        v = 0
+        for mon in m2List:
+            v += expVal(wrldList[1:], mon, char, Exit, 0, Depth, CostLookup)
+
+        for mon in m1List:
+            v += expVal(wrldList[1:], mon, char, Exit, 0, Depth, CostLookup)
+
+        if v > BestAction[0]:
+            BestAction = [v, char]
 
     #extract the char's movement
-    print("calls:", Calls)
     print("time:", time.time()-t)
 
     return [BestAction[1].x, BestAction[1].y]
@@ -81,45 +81,40 @@ def expectiMax(wrld, Exit, Depth):
 
 #############################################################################################
 #expVal(OpMonster, OpMonster, OpChar, [int x, int y], int currentDepth, int Maxdepth)-> int value
-def expVal(wrldList, m1, m2, c, Exit, D, DMax):
-    global Calls
-    if D == DMax or ((m1 is not None) and moveDist(m1,c)<=1) or ((m2 is not None) and moveDist(m2,c)<=1) or ((m1 is None) and (m2 is None)):
-        return cost(wrldList[0], m1, m2, c, Exit, D, DMax)
+def expVal(wrldList, m, c, Exit, D, DMax, CostLookup):
+
+    if D == DMax or ((m is not None) and moveDist(m,c)<=1) or (m is None):
+        return cost(wrldList[0], m, c, Exit, D, DMax)
 
     v=0
 
     cList = find_actions_OpObj(wrldList[0], c)
-    m1List = find_actions_monster(wrldList[0], m1, c, DMax - D)
-    m2List = find_actions_monster(wrldList[0], m2, c, DMax - D)
+    mList = find_actions_monster(wrldList[0], m, c, DMax - D)
 
-    for mon2 in m2List:
-        for mon1 in m1List:
-            for char in cList:
-                Calls += 1
-                p = 1/(len(m1List) + len(m2List) + len(cList))
-                v = v + p * maxVal(wrldList[1:], mon1, mon2, char, Exit, D + 1, DMax)
+
+    for mon in mList:
+        for char in cList:
+            p = 1/(len(mList) + len(cList))
+            v = v + p * maxVal(wrldList[1:], mon, char, Exit, D + 1, DMax, CostLookup)
 
     return v
 
 
 #############################################################################################
 #expVal(OpMonster, OpMonster, OpChar, [int x, int y], int currentDepth, int Maxdepth)-> int value
-def maxVal(wrldList, m1, m2, c, Exit, D, DMax):
-    if D == DMax or ((m1 is not None) and moveDist(m1,c)<=1) or ((m2 is not None) and moveDist(m2,c)<=1) or ((m1 is None) and (m2 is None)):
-        return cost(wrldList[0], m1, m2, c, Exit, D, DMax)
+def maxVal(wrldList, m, c, Exit, D, DMax, CostLookup):
+
+    if D == DMax or ((m is not None) and moveDist(m, c) <= 1) or (m is None):
+        return cost(wrldList[0], m, c, Exit, D, DMax)
 
     v = -(sys.maxsize - 1)
 
     cList = find_actions_OpObj(wrldList[0], c)
-    m1List = find_actions_monster(wrldList[0], m1, c, DMax-D)
-    m2List = find_actions_monster(wrldList[0], m2, c, DMax-D)
+    mList = find_actions_monster(wrldList[0], m, c, DMax - D)
 
-    global Calls
-    for mon2 in m2List:
-        for mon1 in m1List:
-            for char in cList:
-                Calls += 1
-                v = max(v, expVal(wrldList[1:], mon1, mon2, char, Exit, D + 1, DMax))
+    for mon in mList:
+        for char in cList:
+            v = max(v, expVal(wrldList[1:], mon, char, Exit, D + 1, DMax, CostLookup))
 
     return v
 
@@ -128,30 +123,27 @@ def maxVal(wrldList, m1, m2, c, Exit, D, DMax):
 #moveDist(OpMonster, OpChar)-> int
 #returns the number of movements (disreguarding walls) needed to hit the charicter
 def moveDist(m, c):
-    return max(abs(m.x - c.x), abs(m.y - c.y))
+    return abs(m.x - c.x)+ abs(m.y - c.y)
 
 
 #############################################################################################
 #expVal(OpMonster, OpMonster, OpChar, [int x, int y], int currentDepth, int Maxdepth)-> int value
-def cost(wrld, m1, m2, c, Exit, D, DMax):
+def cost(wrld, m, c, Exit, D, DMax):
 
     cost = 0
+    #cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))
+    # Elen = greedyBFS.getPathLen([c.x, c.y], Exit, wrld)
+    # if Elen is not None:
+    #     cost += -Elen*.5
 
   # ________________________________________________________________________________#
     #set Monster cost, trigger high value for death, and early death
 
-    if m1 is not None:
-        if moveDist(m1, c) <= 1:
-            return -100*(DMax+1-D)
+    if m is not None:
+        if moveDist(m, c) <= 1:
+            return -100**(DMax+2-D)
 
-        cost += - 5 ** (4 - moveDist(m1, c)) - 2 ** (6 - len(find_actions_OpObj(wrld, c)))
-
-
-    if m2 is not None:
-        if moveDist(m2, c) <= 1:
-            return -100 * (DMax + 1 - D)
-
-        cost += - 5 ** (4 - moveDist(m2, c)) - 2 ** (6 - len(find_actions_OpObj(wrld, c)))
+        cost += - 5 ** (4 - moveDist(m, c)) - 100 ** (8 - len(find_actions_OpObj(wrld, c)))
 
 
   # ________________________________________________________________________________#
@@ -212,11 +204,11 @@ def find_actions_OpObj(wrld, OpObj):
 
             if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
 
-                if (not (i == 0 and j == 0)) and not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
+                if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
 
                     if isinstance(OpObj, OpChar):
                         actions.append(OpChar(OpObj.x + i, OpObj.y + j))
-                    else:
+                    elif (not (i == 0 and j == 0)):
                         actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
 
     return actions
