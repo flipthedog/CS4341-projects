@@ -6,7 +6,7 @@ import pathfinding as greedyBFS
 #Given a world, ticked for any bombs, a character, a monsterlist of size 1 or 2 (as there is a max of 2 monsters)
 #a positional tuple of the exit, and the max depth to reach. The depth will early exit in the case of succsess (reaching
 #the exit) and failure (death)
-def expectiMax(wrld, Exit, Depth, CostLookup):
+def expectiMax(wrld, Exit, Depth):
   #________________________________________________________________________________#
     #Set up charicter placement, converting charicters to optimized charicters
     Mlist = []
@@ -25,18 +25,16 @@ def expectiMax(wrld, Exit, Depth, CostLookup):
         raise Exception('Trying to use expectimax with no monster')
     else:
 
-        try:
-            rnge = Mlist[0].rnge
-        except:
+        rnge = 1
+        if Mlist[0].avatar == 'A':
             rnge = 2
         m1 = OpMonster(Mlist[0].x, Mlist[0].y, rnge)
 
 
         if len(Mlist)>=2:
 
-            try:
-                rnge = Mlist[1].rnge
-            except:
+            rnge = 1
+            if Mlist[1].avatar == 'A':
                 rnge = 2
             m2 = OpMonster(Mlist[1].x, Mlist[1].y, rnge)
 
@@ -65,10 +63,10 @@ def expectiMax(wrld, Exit, Depth, CostLookup):
     for char in cList:
         v = 0
 
-        v += expVal(wrldList[1:], m1, char, Exit, 0, Depth, CostLookup)
+        v += expVal(wrldList[1:], m1, char, Exit, 0, Depth)
 
 
-        v += expVal(wrldList[1:], m2, char, Exit, 0, Depth, CostLookup)
+        v += expVal(wrldList[1:], m2, char, Exit, 0, Depth)
 
         if v > BestAction[0]:
             BestAction = [v, char]
@@ -81,7 +79,7 @@ def expectiMax(wrld, Exit, Depth, CostLookup):
 
 #############################################################################################
 #expVal(OpMonster, OpMonster, OpChar, [int x, int y], int currentDepth, int Maxdepth)-> int value
-def expVal(wrldList, m, c, Exit, D, DMax, CostLookup):
+def expVal(wrldList, m, c, Exit, D, DMax):
 
     if D == DMax or ((m is not None) and moveDist(m,c)<=1) or (m is None):
         return cost(wrldList[0], m, c, Exit, D, DMax)
@@ -93,14 +91,14 @@ def expVal(wrldList, m, c, Exit, D, DMax, CostLookup):
 
     for mon in mList:
         p = 1/(len(mList))
-        v = v + p * maxVal(wrldList[1:], mon, c, Exit, D + 1, DMax, CostLookup)
+        v = v + p * maxVal(wrldList[1:], mon, c, Exit, D + 1, DMax)
 
     return v
 
 
 #############################################################################################
 #expVal(OpMonster, OpMonster, OpChar, [int x, int y], int currentDepth, int Maxdepth)-> int value
-def maxVal(wrldList, m, c, Exit, D, DMax, CostLookup):
+def maxVal(wrldList, m, c, Exit, D, DMax):
 
     if D == DMax or ((m is not None) and moveDist(m, c) <= 1) or (m is None):
         return cost(wrldList[0], m, c, Exit, D, DMax)
@@ -110,7 +108,7 @@ def maxVal(wrldList, m, c, Exit, D, DMax, CostLookup):
     cList = find_actions_OpObj(wrldList[0], c)
 
     for char in cList:
-        v = max(v, expVal(wrldList[1:], m, char, Exit, D + 1, DMax, CostLookup))
+        v = max(v, expVal(wrldList[1:], m, char, Exit, D + 1, DMax))
 
     return v
 
@@ -159,23 +157,35 @@ def find_actions_monster(wrld, m, c, DMax):
     if m is None:
         return [None]
 
-    actions = []
-
     #if its in range, the monster walks at the charicter
-    if moveDist(m,c) <= m.rnge:
-        actions.append(OpMonster(m.x + (c.x - m.x), m.y + (c.y - m.y), m.rnge))
+    if max(abs(m.x - c.x), abs(m.y - c.y)) <= m.rnge:
+        mon = OpMonster(m.x + (c.x - m.x), m.y + (c.y - m.y), m.rnge)
+        mon.xP = m.x
+        mon.yP = m.y
+        return [mon]
 
     #if too far away to kill the charicter in depth number of moves, then the monster should be ignored.
     #TODO make sure this doesn't cause problems
     elif moveDist(m,c) > DMax*2+1:
         return [None]
 
+    elif m.rnge==2:
+        w = wrld.width()
+        h = wrld.height()
+        dx = m.x-m.xP
+        dy = m.y-m.yP
+        if not (dy !=0 and dx!=0) and (not (m.x+dx >= w or m.x+dx <0 or m.y+dy >= h or m.y+dy <0)) and (not wrld.wall_at(m.x+dx,m.y+dy)):
+            mon= OpMonster(m.x+dx,m.y+dy, m.rnge)
+            mon.xP = m.x
+            mon.yP = m.y
+            return [mon]
     # otherwise it moves randomly into a new safe space
-    else:
         # check 8 connected for walls and out of bounds.
-        actions = find_actions_OpObj(wrld, m)
-        for Mon in actions:
-            Mon.rnge = m.rnge
+    actions = find_actions_OpObj(wrld, m)
+    for Mon in actions:
+        Mon.rnge = m.rnge
+        Mon.xP = m.x
+        Mon.xY = m.y
 
     return actions
 
@@ -218,6 +228,8 @@ class OpMonster:
     def __init__(self, x, y, rnge= 0):
         self.x = x
         self.y = y
+        self.xP = x
+        self.yP = y
         self.rnge = rnge
 
 
