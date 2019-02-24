@@ -52,8 +52,8 @@ def expectiMax(wrld, Exit, Depth, CostLookup):
         wrldList.append(newwrld)
 
     cList = find_actions_OpObj(wrldList[0], c)
-    m1List = find_actions_monster(wrldList[0], m1, c, Depth)
-    m2List = find_actions_monster(wrldList[0], m2, c, Depth)
+    # m1List = find_actions_monster(wrldList[0], m1, c, Depth)
+    # m2List = find_actions_monster(wrldList[0], m2, c, Depth)
 
 
   #________________________________________________________________________________#
@@ -64,11 +64,11 @@ def expectiMax(wrld, Exit, Depth, CostLookup):
 
     for char in cList:
         v = 0
-        for mon in m2List:
-            v += expVal(wrldList[1:], mon, char, Exit, 0, Depth, CostLookup)
 
-        for mon in m1List:
-            v += expVal(wrldList[1:], mon, char, Exit, 0, Depth, CostLookup)
+        v += expVal(wrldList[1:], m1, char, Exit, 0, Depth, CostLookup)
+
+
+        v += expVal(wrldList[1:], m2, char, Exit, 0, Depth, CostLookup)
 
         if v > BestAction[0]:
             BestAction = [v, char]
@@ -88,14 +88,12 @@ def expVal(wrldList, m, c, Exit, D, DMax, CostLookup):
 
     v=0
 
-    cList = find_actions_OpObj(wrldList[0], c)
     mList = find_actions_monster(wrldList[0], m, c, DMax - D)
 
 
     for mon in mList:
-        for char in cList:
-            p = 1/(len(mList) + len(cList))
-            v = v + p * maxVal(wrldList[1:], mon, char, Exit, D + 1, DMax, CostLookup)
+        p = 1/(len(mList))
+        v = v + p * maxVal(wrldList[1:], mon, c, Exit, D + 1, DMax, CostLookup)
 
     return v
 
@@ -110,11 +108,9 @@ def maxVal(wrldList, m, c, Exit, D, DMax, CostLookup):
     v = -(sys.maxsize - 1)
 
     cList = find_actions_OpObj(wrldList[0], c)
-    mList = find_actions_monster(wrldList[0], m, c, DMax - D)
 
-    for mon in mList:
-        for char in cList:
-            v = max(v, expVal(wrldList[1:], mon, char, Exit, D + 1, DMax, CostLookup))
+    for char in cList:
+        v = max(v, expVal(wrldList[1:], m, char, Exit, D + 1, DMax, CostLookup))
 
     return v
 
