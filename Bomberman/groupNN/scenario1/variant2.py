@@ -9,8 +9,10 @@ from game import Game
 from monsters.stupid_monster import StupidMonster
 
 # TODO This is your code!
+#sys.path.insert(1, '../groupNN')
 sys.path.insert(1, '../groupNN')
-from finitestatecharacterV2 import FiniteStateCharacter
+sys.path.insert(1, '../Scenario1Characters')
+from finitestatecharacterV2Ex2 import FiniteStateCharacter
 
 # Create the game
 random.seed(123) # TODO Change this if you want different random choices
