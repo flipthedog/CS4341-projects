@@ -139,8 +139,8 @@ def cost(wrld, m, c, Exit, D, DMax):
         if (currRange <= 1 and m.rnge !=0) or currRange <= 0:
             return -100**(DMax+2-D)
 
-        if currRange <= m.rnge:
-            cost += - 5 ** (4 - moveDist(m, c)) #- 0 ** (8 - len(find_actions_OpObj(wrld, c)))
+        if currRange <= m.rnge+1:
+            cost += - 5 ** (1+m.rnge - moveDist(m, c))  - 1.5 ** (8 - len(find_actions_OpObj(wrld, c)))
 
 
   # ________________________________________________________________________________#
@@ -148,7 +148,7 @@ def cost(wrld, m, c, Exit, D, DMax):
 
     if max(abs(Exit[0] - c.x), abs(Exit[1] - c.y)) <=2:
         #print("ahhh", c.x, c.y, abs(Exit[0] - c.x), abs(Exit[0] - c.y))
-        return 1000
+        return 100*(3-max(abs(Exit[0] - c.x), abs(Exit[1] - c.y)))
 
     return cost
 

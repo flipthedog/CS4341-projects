@@ -38,7 +38,7 @@ class FiniteStateCharacter(CharacterEntity):
         isThereBomb = self.isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
         m = next(iter(wrld.monsters.values()))[0]
-        if self.MoveDist([meX, meY], [m.x, m.y]) <= 3:
+        if self.MoveDist([meX, meY], [m.x, m.y]) <= 2:
             isThereMonster = True#self.isThereMonster(closeObjects)
         else:
             isThereMonster = False
