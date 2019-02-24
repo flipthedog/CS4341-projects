@@ -15,24 +15,23 @@ sys.path.insert(1, '../Scenario1Characters')
 from finitestatecharacterV5Ex2 import FiniteStateCharacter
 
 # Create the game
-for s in range(124):
-    random.seed(s) # TODO Change this if you want different random choices
-    g = Game.fromfile('map.txt')
-    g.add_monster(StupidMonster("monster", # name
-                                "S",       # avatar
-                                3, 5,      # position
-    ))
-    g.add_monster(SelfPreservingMonster("monster", # name
-                                        "A",       # avatar
-                                        3, 13,     # position
-                                        2          # detection range
-    ))
+random.seed(123) # TODO Change this if you want different random choices
+g = Game.fromfile('map.txt')
+g.add_monster(StupidMonster("monster", # name
+                            "S",       # avatar
+                            3, 5,      # position
+))
+g.add_monster(SelfPreservingMonster("monster", # name
+                                    "A",       # avatar
+                                    3, 13,     # position
+                                    2          # detection range
+))
 
-    # TODO Add your character
-    g.add_character(FiniteStateCharacter("me", # name
-                                  "C",  # avatar
-                                  0, 0  # position
-    ))
+# TODO Add your character
+g.add_character(FiniteStateCharacter("me", # name
+                              "C",  # avatar
+                              0, 0  # position
+))
 
-    # Run!
-    g.go()
+# Run!
+g.go()
