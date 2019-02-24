@@ -89,7 +89,8 @@ def greedyBFS(start, end, wrld):
                         if point[0] == x + i and point[1] == y + j:
                             notEvalFlag= False
                     #if the checked position has not already been checked, and there is not a wall at the location
-                    if notEvalFlag and not wrld.wall_at(x + i, y + j) and not wrld.explosion_at(x + i, y + j):
+                    if notEvalFlag and not wrld.wall_at(x + i, y + j):
+                         #and not wrld.explosion_at(x + i, y + j):
                         #create a new gridcell, with the previous postition being the gridcell used in this for for loop
                         #to reach the position
                         current = gridcell([x + i, y + j], popped)

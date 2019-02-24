@@ -49,7 +49,10 @@ def expectiMax(wrld, Depth):
     #TODO: Process each m individually; possibly by distance
     m = next(iter(wrld.monsters.values()))[0]
     c = next(iter(wrld.characters.values()))[0]
-
+    m.move(0,0)
+    c.move(0,0)
+    (newwrld, events) = wrld.next()
+    wrld = newwrld
     #get actions
     mActList = find_actions(wrld, m.x, m.y)
     cActList = find_actions(wrld, c.x, c.y)
@@ -165,7 +168,7 @@ def find_actions(state, x, y):
 
             if not (x + i >= width or x + i < 0 or y + j >= height or y + j < 0):
 
-                if (not(i == 0 and j == 0)) and not (state.wall_at(x + i, y + j)):
+                if (not(i == 0 and j == 0)) and not (state.wall_at(x + i, y + j)) and not (state.explosion_at(x + i, y+ j)):
 
                     actions.append([x + i, y + j])
 

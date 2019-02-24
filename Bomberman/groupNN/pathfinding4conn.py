@@ -84,7 +84,8 @@ def greedyBFS(start, end, wrld):
                         point = pointCell[1].current
                         if point[0] == x + i and point[1] == y + j:
                             notEvalFlag= False
-                    if notEvalFlag not in evaluated and not wrld.explosion_at(x + i, y + j):
+                    if notEvalFlag not in evaluated:
+                        # and not wrld.explosion_at(x + i, y + j):
                         #create a new gridcell, with the previous postition being the gridcell used in this for for loop
                         #to reach the position
                         current = gridcell([x + i, y + j], popped)
