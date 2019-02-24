@@ -174,7 +174,7 @@ class FiniteStateCharacter(CharacterEntity):
                 if  dist < clstOneDist:
                     clstOne = e
                     clstOneDist = dist
-            if abs(meX-clstOne.x) == 0 or abs(meY-clostOne.Y) == 0:
+            if abs(meX-clstOne.x) == 0 and abs(meY-clstOne.y) == 0:
                 # Move to the closest open space
                 moveTo = ()
                 for i in range(-1, 1):
@@ -188,9 +188,15 @@ class FiniteStateCharacter(CharacterEntity):
                                         moveTo = (i, j)
                 # Move to last saved space
                 self.move(moveTo[0], moveTo[1])
+            elif abs(meX-clstOne.x) == 0:
+                # Move 1 step in the opposite direction from the explosion cell
+                self.move(0, -(1/abs(meY-clstOne.y)) * abs(meY-clstOne.y))
+            elif abs(meY-clstOne.y) == 0:
+                # Move 1 step in the opposite direction from the explosion cell
+                self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clstOne.x), 0)
             else:
                 # Move 1 step in the opposite direction from the explosion cell
-                self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clostOne.x), -(1/abs(meY-clostOne.Y)) * abs(meY-clostOne.Y))
+                self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clstOne.x), -(1/abs(meY-clstOne.y)) * abs(meY-clstOne.y))
         else:
             # If not, continue with traditional greedy
             self.greedy(wrld, exit, meX, meY)
