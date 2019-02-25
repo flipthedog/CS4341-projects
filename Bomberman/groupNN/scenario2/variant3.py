@@ -14,7 +14,7 @@ sys.path.insert(1, '../groupNN')
 from testcharacter import TestCharacter
 
 # Create the game
-random.seed(6) # TODO Change this if you want different random choices
+random.seed(49) # TODO Change this if you want different random choices
 g = Game.fromfile('map.txt')
 g.add_monster(SelfPreservingMonster("monster", # name
                                     "M",       # avatar

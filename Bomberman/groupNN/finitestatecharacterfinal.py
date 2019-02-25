@@ -16,9 +16,15 @@ from colorama import Fore, Back
 # 4) Higher level algorithms
 
 
+
 class FiniteStateCharacter(CharacterEntity):
+    def __init__(self, name, avatar, x, y):
+        CharacterEntity.__init__(self, name, avatar, x, y)
+        self.ticked = False
+
 
     def do(self, wrld):
+        print("doing")
         # This method calls different algorithms to find the next position to
         # move based on the finite state the character is in.
 
@@ -113,7 +119,7 @@ class FiniteStateCharacter(CharacterEntity):
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.expectiMax(wrld, exit, 5)
+        goTo = EM.expectiMax(wrld, exit, 2)
 
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
@@ -139,18 +145,22 @@ class FiniteStateCharacter(CharacterEntity):
 
     def avoidanceNoMster(self, wrld, exit, meX, meY, bmbs, exps):
         # Check if there are bombs
-        if bmbs and not exps:
-            # Advance the bomb one tick
+        if bmbs and not exps and self.ticked == False:
+            print("here too")
+            # Advance the bomb two ticks
             try:
                 m = next(iter(wrld.monsters.values()))[0]
                 m.move(0,0)
                 wrld.characters = {}
                 (newwrld, events) = wrld.next()
-                wrld = newwrld
+                (newwrld2, events) = newwrld.next()
+                wrld = newwrld2
             except StopIteration:
                 wrld.characters = {}
                 (newwrld, events) = wrld.next()
-                wrld = newwrld
+                (newwrld2, events) = newwrld.next()
+                wrld = newwrld2
+            self.ticked = True
             # See if there are explosions now
             exps = []
 
@@ -164,6 +174,32 @@ class FiniteStateCharacter(CharacterEntity):
             if not exps:
                 exps = None
         # Check if there are any explosions
+        if bmbs and not exps and self.ticked == True:
+            print("here too")
+            # Advance the bomb two ticks
+            try:
+                m = next(iter(wrld.monsters.values()))[0]
+                m.move(0,0)
+                wrld.characters = {}
+                (newwrld, events) = wrld.next()
+                wrld = newwrld
+            except StopIteration:
+                wrld.characters = {}
+                (newwrld, events) = wrld.next()
+                wrld = newwrld
+            self.ticked = False
+            # See if there are explosions now
+            exps = []
+
+            # All of the explosions
+            e = wrld.explosions.items()
+
+            # Filtering only close monsters
+            for x,exp in e:
+                if self.MoveDist([meX, meY], [exp.x, exp.y]) <= 1:
+                    exps.append(exp)
+            if not exps:
+                exps = None
         if exps is not None:
             # If so,
             # Figure out which explosion cell is the closest
@@ -198,5 +234,6 @@ class FiniteStateCharacter(CharacterEntity):
                 # Move 1 step in the opposite direction from the explosion cell
                 self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clstOne.x), -(1/abs(meY-clstOne.y)) * abs(meY-clstOne.y))
         else:
+            print("here")
             # If not, continue with traditional greedy
             self.greedy(wrld, exit, meX, meY)

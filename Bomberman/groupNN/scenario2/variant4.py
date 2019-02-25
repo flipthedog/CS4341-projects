@@ -16,7 +16,7 @@ from finitestatecharacterfinal import FiniteStateCharacter
 random.seed(555) # TODO Change this if you want different random choices
 g = Game.fromfile('map.txt')
 g.add_monster(SelfPreservingMonster("monster", # name
-                                    "A",       # avatar
+                                    "M",       # avatar
                                     3, 13,     # position
                                     2          # detection range
 ))
