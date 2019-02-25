@@ -1,5 +1,6 @@
 import sys
 import time
+import math
 import pathfinding as greedyBFS
 #############################################################################################
 #expectiMax(World, Character, MonsterList, [int xf, int yf], int)-> [int xOp, int yOp]
@@ -125,6 +126,7 @@ def moveDist(m, c):
 def cost(wrld, m, c, Exit, D, DMax):
 
     cost = 0
+
     cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))
     # Elen = greedyBFS.getPathLen([c.x, c.y], Exit, wrld)
     # if Elen is not None:
@@ -136,11 +138,24 @@ def cost(wrld, m, c, Exit, D, DMax):
     if m is not None:
 
         currRange = max(abs(m.x - c.x), abs(m.y - c.y))
-        if (currRange <= 1 and m.rnge !=0) or currRange <= 0:
+        if currRange <= m.rnge+1:
+            cost = 0
+            # print(
+            #     "#############################################################################################################")
+
+        if (currRange <= 2 and m.rnge !=0) or currRange <= 0:
             return -100**(DMax+2-D)
 
+        # if m.rnge >=2 :
+        #     slope = (m.y-m.yP)/(m.x-m.xP -.000001)
+        #     for j in range(-2,2):
+        #         for k in range(-2,2):
+        #             if c.y == math.floor(slope*c.x - (m.x+j) + m.y+k):
+        #                 cost+=-10 ** (2 - max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))+ (8 - len(find_actions_OpObj(wrld, c))))
+        #                 print("#############################################################################################################")
         if currRange <= m.rnge+1:
-            cost += - 5 ** (1+m.rnge - moveDist(m, c))  - 1.5 ** (8 - len(find_actions_OpObj(wrld, c)))
+            cost += - 5 ** (5+m.rnge - max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))) - 5**(8 - len(find_actions_OpObj(wrld, c)))
+            # print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>_____________________>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
 
   # ________________________________________________________________________________#
@@ -174,7 +189,7 @@ def find_actions_monster(wrld, m, c, DMax):
     elif moveDist(m,c) > DMax*2+1:
         return [None]
 
-    elif m.rnge==2:
+    elif m.rnge==3:
         w = wrld.width()
         h = wrld.height()
         dx = m.x-m.xP
