@@ -14,6 +14,7 @@ def expectiMax(wrld, Exit, Depth):
     for monList in wrld.monsters.values():
         for mon in monList:
             Mlist.append(mon)
+
     cExt = next(iter(wrld.characters.values()))[0]
 
 
@@ -24,7 +25,7 @@ def expectiMax(wrld, Exit, Depth):
     m1 = None
     m2 = None
 
-    if len(Mlist)==0:
+    if len(Mlist) == 0:
         raise Exception('Trying to use expectimax with no monster')
     else:
 
@@ -32,7 +33,6 @@ def expectiMax(wrld, Exit, Depth):
         if Mlist[0].avatar == 'A':
             rnge = 2
         m1 = OpMonster(Mlist[0].x, Mlist[0].y, rnge)
-
 
         if len(Mlist)>=2:
 
@@ -47,12 +47,13 @@ def expectiMax(wrld, Exit, Depth):
     #generate all worlds at begining, so it doesn't have to be constantly recreated
     wrld.character = {}
     wrldList = []
-    for i in range(2*Depth+2):
+    for i in range(Depth):
 
         # (newwrld, events) = wrld.next()
         wrldList.append(wrld)
 
     cList = find_actions_OpObj(wrldList[0], c)
+    y = 5
     # m1List = find_actions_monster(wrldList[0], m1, c, Depth)
     # m2List = find_actions_monster(wrldList[0], m2, c, Depth)
 

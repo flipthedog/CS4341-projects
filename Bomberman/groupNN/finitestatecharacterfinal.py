@@ -3,7 +3,7 @@ import sys
 import copy
 import pathfinding as greedyBFS
 import pathfinding4conn as conn4
-import ExpectimaxOptimized as EM
+import expectimaxV4 as EM
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -128,7 +128,7 @@ class FiniteStateCharacter(CharacterEntity):
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.expectiMax(wrld, exit, 1)
+        goTo = EM.expectiMax(wrld, 1)
 
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
