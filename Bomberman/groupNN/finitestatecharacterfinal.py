@@ -28,62 +28,60 @@ class FiniteStateCharacter(CharacterEntity):
 
     def do(self, wrld):
 
-        self.currwrld = copy.deepcopy(wrld)
         # This method calls different algorithms to find the next position to
         # move based on the finite state the character is in.
-        if self.oldwrld is not None:
-            wrld = self.oldwrld
+
         # Find the exit to move towards
-            exit = [0, 0]
+        exit = [0, 0]
 
-            #check every gridcell for the exit. Uses the last exit found as the "goal"
-            for i in range(wrld.width()):
+        #check every gridcell for the exit. Uses the last exit found as the "goal"
+        for i in range(wrld.width()):
 
-                for j in range(wrld.height()):
+            for j in range(wrld.height()):
 
-                    if wrld.exit_at(i, j):
-                        exit = [i, j]
+                if wrld.exit_at(i, j):
+                    exit = [i, j]
 
-            #get current position
-            meX = wrld.me(self).x
-            meY = wrld.me(self).y
-            print("doing", meX,meY)
-
-
+        #get current position
+        meX = wrld.me(self).x
+        meY = wrld.me(self).y
+        print("doing", meX,meY)
 
 
-            # True if there is at least 1 monster within 5 steps
-            isThereMonster = self.isThereMonster(wrld, meX, meY)
 
-            # A list of bombs if there are bombs on the board, empty otherwise
-            isThereBomb = self.isThereBomb(wrld, meX, meY)
 
-            # A list of explosions if there is at least 1 explosion within 2 steps, empty otherwise
-            isThereExplosion = self.isThereExplosion(wrld, meX, meY)
+        # True if there is at least 1 monster within 5 steps
+        isThereMonster = self.isThereMonster(wrld, meX, meY)
 
-            if isThereBomb and isThereMonster and isThereExplosion:
-                # There at least 1 bomb, 1 monster, and 1 explosion within the danger zone
-                self.expectimax(wrld, exit, meX, meY)
-            elif isThereBomb and isThereMonster:
-                self.expectimax(wrld, exit, meX, meY)
-            elif isThereBomb and isThereExplosion:
-                # There is both at least 1 bomb and 1 explosion within 2 steps
-                self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
-            elif isThereExplosion and isThereMonster:
-                # There is both at least 1 explosion and 1 monster within 2 steps
-                self.expectimax(wrld, exit, meX, meY)
-            elif isThereMonster:
-                # There is at least 1 monster within 2 steps
-                self.expectimax(wrld, exit, meX, meY)
-            elif isThereBomb:
-                # There is at least 1 bomb within 2 steps
-                self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
-            elif isThereExplosion:
-                self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
-            else:
-                # There is no danger nearby
-                self.greedy(wrld, exit, meX, meY)
-        self.oldwrld = self.currwrld
+        # A list of bombs if there are bombs on the board, empty otherwise
+        isThereBomb = self.isThereBomb(wrld, meX, meY)
+
+        # A list of explosions if there is at least 1 explosion within 2 steps, empty otherwise
+        isThereExplosion = self.isThereExplosion(wrld, meX, meY)
+
+        if isThereBomb and isThereMonster and isThereExplosion:
+            # There at least 1 bomb, 1 monster, and 1 explosion within the danger zone
+            self.expectimax(wrld, exit, meX, meY)
+        elif isThereBomb and isThereMonster:
+            self.expectimax(wrld, exit, meX, meY)
+        elif isThereBomb and isThereExplosion:
+            # There is both at least 1 bomb and 1 explosion within 2 steps
+            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
+        elif isThereExplosion and isThereMonster:
+            # There is both at least 1 explosion and 1 monster within 2 steps
+            self.expectimax(wrld, exit, meX, meY)
+        elif isThereMonster:
+            # There is at least 1 monster within 2 steps
+            self.expectimax(wrld, exit, meX, meY)
+        elif isThereBomb:
+            # There is at least 1 bomb within 2 steps
+            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
+        elif isThereExplosion:
+            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
+        else:
+            # There is no danger nearby
+            self.greedy(wrld, exit, meX, meY)
+
 
 
     def MoveDist(self, start, end):
@@ -121,7 +119,7 @@ class FiniteStateCharacter(CharacterEntity):
             for x,monstr in m:
                 ms = monstr
                 for ms in monstr:
-                    if self.MoveDist([meX, meY], [ms.x, ms.y]) <= 4:
+                    if self.MoveDist([meX, meY], [ms.x, ms.y]) <= 3:
                         return True
                 return False
 
@@ -129,12 +127,13 @@ class FiniteStateCharacter(CharacterEntity):
         print("EXPECTIMAXING!")
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.expectimax(wrld, exit, 3)
+        goTo = EM.expectimax(wrld, exit, 2)
 
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
         if goTo[0] == exit[0] and goTo[1] == exit[1]:
+            print("Threw that")
             raise ValueError
 
 
@@ -146,6 +145,7 @@ class FiniteStateCharacter(CharacterEntity):
         goTo = greedyBFS.getNextStep([meX, meY], exit, wrld)
 
         if goTo[0] == exit[0] and goTo[1] == exit[1]:
+            print("Threw that")
             raise ValueError
 
         if goTo is None:

@@ -55,15 +55,14 @@ def expectimax(wrld, exit, depth):
 
     for char in c_list:
 
-        for m in m1_list:
+        v = 0
 
-            v = 0
+        for m in m1_list:
 
             v += max_node(wrld_list[1:], m, char, exit, 0 , depth)
 
-            if v > best_action[0]:
-                best_action = [v, char]
-
+        if (v/len(m1_list)) > best_action[0]:
+            best_action = [(v/len(m1_list)), char]
     return [best_action[1].x, best_action[1].y]
 
 def exp_node(wrld_list, m, c, exit, d, dmax):
@@ -123,7 +122,7 @@ def cost(wrld, m, c, Exit, D, DMax):
             return -(100*(DMax+2-D))
 
         # if currRange <= m.rnge+1:
-        cost += - 5 * (1+m.rnge - moveDist(m, c))  - 1.5 * (8 - len(find_actions_OpObj(wrld, c)))
+        cost += - 5 ** (1+m.rnge - moveDist(m, c))  - 1.5 * (8 - len(find_actions_OpObj(wrld, c)))
         #print("Yo hey, monstar here", m.x,m.y, cost)
 
 
