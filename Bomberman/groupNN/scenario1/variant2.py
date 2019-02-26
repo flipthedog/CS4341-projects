@@ -14,7 +14,7 @@ from finitestatecharacterfinal import FiniteStateCharacter
 
 wins = 0
 # Create the game
-for i in range(10):
+for i in range(5):
     random.seed(2) # TODO Change this if you want different random choices
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("monster", # name
@@ -30,8 +30,8 @@ for i in range(10):
 
     # Run!
     try:
-        g.go()
+        g.go(1)
     except ValueError:
         wins+=1
 
-print(wins)
+print("These are the wins: " , wins)
