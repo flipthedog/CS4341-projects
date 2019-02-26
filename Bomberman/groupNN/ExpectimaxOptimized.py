@@ -18,6 +18,9 @@ def expectiMax(wrld, Exit, Depth):
 
 
     c = OpChar(cExt.x, cExt.y)
+
+
+    print("START:", c.x, c.y)
     m1 = None
     m2 = None
 
@@ -44,10 +47,10 @@ def expectiMax(wrld, Exit, Depth):
     #generate all worlds at begining, so it doesn't have to be constantly recreated
     wrld.character = {}
     wrldList = []
-    for i in range(Depth+2):
+    for i in range(2*Depth+2):
 
-        (newwrld, events) = wrld.next()
-        wrldList.append(newwrld)
+        # (newwrld, events) = wrld.next()
+        wrldList.append(wrld)
 
     cList = find_actions_OpObj(wrldList[0], c)
     # m1List = find_actions_monster(wrldList[0], m1, c, Depth)
@@ -65,14 +68,17 @@ def expectiMax(wrld, Exit, Depth):
 
         v += expVal(wrldList[1:], m1, char, Exit, 0, Depth)
 
-
-        v += expVal(wrldList[1:], m2, char, Exit, 0, Depth)
+        #v += expVal(wrldList[1:], m2, char, Exit, 0, Depth)
 
         if v > BestAction[0]:
             BestAction = [v, char]
 
     #extract the char's movement
+    print("ABSMOVE",BestAction[1].x, BestAction[1].y, BestAction[0])
     print("time:", time.time()-t)
+
+
+    # raise EnvironmentError
 
     return [BestAction[1].x, BestAction[1].y]
 
@@ -88,10 +94,17 @@ def expVal(wrldList, m, c, Exit, D, DMax):
 
     mList = find_actions_monster(wrldList[0], m, c, DMax - D)
 
+    #TODO MAYBE PROBLEMS????
+    if mList[0] is None and len(mList) == 1:
+        return maxVal(wrldList[1:], None, c, Exit, D + 1, DMax)
 
     for mon in mList:
         p = 1/(len(mList))
-        v = v + p * maxVal(wrldList[1:], mon, c, Exit, D + 1, DMax)
+        a = maxVal(wrldList[1:], mon, c, Exit, D + 1, DMax)
+        v = v + p * a
+        print("                               indivMonMove,x,y,v", mon.x,mon.y,a)
+
+    print("     MonsterMoves, EXP, len,v", len(mList), v)
 
     return v
 
@@ -108,8 +121,10 @@ def maxVal(wrldList, m, c, Exit, D, DMax):
     cList = find_actions_OpObj(wrldList[0], c)
 
     for char in cList:
-        v = max(v, expVal(wrldList[1:], m, char, Exit, D + 1, DMax))
+        v = max(v, expVal(wrldList[1:], m, char, Exit, D, DMax))
+        print("                     individualMove x,y,v", char.x,char.y,v)
 
+    print("         Charicter Moves, Max, len", len(cList),"V", v)
     return v
 
 
@@ -125,7 +140,7 @@ def moveDist(m, c):
 def cost(wrld, m, c, Exit, D, DMax):
 
     cost = 0
-    cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))
+    cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[1] - c.y))
     # Elen = greedyBFS.getPathLen([c.x, c.y], Exit, wrld)
     # if Elen is not None:
     #     cost += -Elen*.5
@@ -137,10 +152,12 @@ def cost(wrld, m, c, Exit, D, DMax):
 
         currRange = max(abs(m.x - c.x), abs(m.y - c.y))
         if (currRange <= 1 and m.rnge !=0) or currRange <= 0:
-            return -100**(DMax+2-D)
+            #print("Yo hey, monstar here", m.x,m.y, -100*(DMax+2-D))
+            return -(100*(DMax+2-D))
 
-        if currRange <= m.rnge+1:
-            cost += - 5 ** (1+m.rnge - moveDist(m, c))  - 1.5 ** (8 - len(find_actions_OpObj(wrld, c)))
+        # if currRange <= m.rnge+1:
+        cost += - 5 * (1+m.rnge - moveDist(m, c))  - 1.5 * (8 - len(find_actions_OpObj(wrld, c)))
+        #print("Yo hey, monstar here", m.x,m.y, cost)
 
 
   # ________________________________________________________________________________#
@@ -152,6 +169,43 @@ def cost(wrld, m, c, Exit, D, DMax):
 
     return cost
 
+def cost1(wrld, m, c, Exit, D, DMax):
+
+    cost = 0
+    cost += 1
+    # Elen = greedyBFS.getPathLen([c.x, c.y], Exit, wrld)
+    # if Elen is not None:
+    #     cost += -Elen*.5
+
+  # ________________________________________________________________________________#
+    #set Monster cost, trigger high value for death, and early death
+
+    if m is not None:
+
+        currRange = max(abs(m.x - c.x), abs(m.y - c.y))
+        if (currRange <= 1 and m.rnge !=0) or currRange <= 0:
+            #print("Yo hey, monstar here", m.x,m.y, -100*(DMax+2-D))
+            cost += 5
+
+        if currRange <= m.rnge+1:
+            cost += 50
+        #print("Yo hey, monstar here", m.x,m.y, cost)
+
+
+  # ________________________________________________________________________________#
+    #if at the exit w/o death, nice, choose this
+
+    if max(abs(Exit[0] - c.x), abs(Exit[1] - c.y)) <=2:
+        #print("ahhh", c.x, c.y, abs(Exit[0] - c.x), abs(Exit[0] - c.y))
+
+        cost += 100
+    if m is not None:
+
+        print("           Character: ", c.x, c.y, "Monster: ", m.x, m.y, "Cost: ", cost)
+    else:
+        print("           Character: ", c.x, c.y, "Cost: ", cost)
+
+    return cost
 
 #############################################################################################
 #find_actions_monster(World, OpMonster, OpChar, Int)-> List[OpMonster]
@@ -219,7 +273,8 @@ def find_actions_OpObj(wrld, OpObj):
 
                     if isinstance(OpObj, OpChar):
                         actions.append(OpChar(OpObj.x + i, OpObj.y + j))
-                    elif (not (i == 0 and j == 0)):
+                    else:
+                        #if monster and total moves less than 8, can stay still if walking into wall
                         actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
 
     return actions
