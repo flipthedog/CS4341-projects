@@ -85,7 +85,7 @@ def exp_node(wrld_list, m, c, exit, d, dmax):
 
 def max_node(wrld_list, m, c, exit, d, dmax):
 
-    if d <= dmax or ((m is not None) and moveDist(m, c) <= 1):
+    if d <= dmax or ((m is not None) and moveDist(m, c) <= 1) or m is None:
         # We are dead or have reached max depth
         return cost(wrld_list[0], m, c, exit, d, dmax)
 
@@ -151,8 +151,8 @@ def find_actions_monster(wrld, m, c, DMax):
 
     #if too far away to kill the charicter in depth number of moves, then the monster should be ignored.
     #TODO make sure this doesn't cause problems
-    elif moveDist(m,c) > DMax*2+1:
-        return [None]
+    # elif moveDist(m,c) > DMax*2+1:
+    #     return [None]
 
     elif m.rnge==2:
         w = wrld.width()
