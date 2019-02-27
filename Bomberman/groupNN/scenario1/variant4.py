@@ -18,7 +18,7 @@ for i in range(25):
     random.seed(i) # TODO Change this if you want different random choices
     g = Game.fromfile('map.txt')
     g.add_monster(SelfPreservingMonster("monster", # name
-                                        "M",       # avatar
+                                        "A",       # avatar
                                         3, 13,     # position
                                         2          # detection range
     ))
