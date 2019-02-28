@@ -37,17 +37,11 @@ class FiniteStateCharacter(CharacterEntity):
         # True if there is at least 1 bomb within 2 steps
         isThereBomb = self.isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
-        mlist = wrld.monsters.values()
-        isThereMonster = False
-        for mon in mlist:
-            for m in mon:
-                try:
-                    rnge = m.rnge - 1
-                except:
-                    rnge = 0
-                if self.MoveDist([meX, meY], [m.x, m.y]) <= 3+rnge:
-                    isThereMonster = True#self.isThereMonster(closeObjects)
-
+        m = next(iter(wrld.monsters.values()))[0]
+        if self.MoveDist([meX, meY], [m.x, m.y]) <= 2:
+            isThereMonster = True#self.isThereMonster(closeObjects)
+        else:
+            isThereMonster = False
         # True if there is at least 1 explosion within 2 steps
         isThereExplosion = self.isThereExplosion(closeObjects)
 
@@ -206,8 +200,10 @@ class FiniteStateCharacter(CharacterEntity):
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.expectiMax(wrld, exit, 5)
 
+        goTo = EM.expectiMax(wrld, exit, 2)
+        if  goTo[0] == exit[0] and goTo[1] == exit[1]:
+            raise ValueError
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
@@ -216,6 +212,7 @@ class FiniteStateCharacter(CharacterEntity):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
         goTo = greedyBFS.getNextStep([meX, meY], exit, wrld)
-
+        if  goTo[0] == exit[0] and goTo[1] == exit[1]:
+            raise ValueError
         #move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
