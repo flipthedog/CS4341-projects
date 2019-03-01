@@ -50,6 +50,20 @@ def expectiMax(wrld, Exit, Depth, TickForward = True):
         (newwrld, events) = wrld.next()
         wrldList.append(newwrld)
 
+
+    MapType = 0
+    v = abs(Exit[0] - 0) + abs(Exit[1] - 0)
+
+    if abs(Exit[0] - (wrld.width() - 1)) + abs(Exit[1] - 0) < v:
+        MapType = 1
+        v = abs(Exit[0] - (wrld.width() - 1)) + abs(Exit[1] - 0)
+    if abs(Exit[0] - 0) + abs(Exit[1] - (wrld.height() - 1)) < v:
+        MapType = 2
+        v = abs(Exit[0] - 0) + abs(Exit[1] - (wrld.height() - 1))
+    if abs(Exit[0] - (wrld.width() - 1)) + abs(Exit[1] - (wrld.height() - 1)) < v:
+        MapType = 3
+    c.MT = MapType
+
     cList = find_actions_OpObj(wrldList[0], c)
     # m1List = find_actions_monster(wrldList[0], m1, c, Depth)
     # m2List = find_actions_monster(wrldList[0], m2, c, Depth)
@@ -126,7 +140,15 @@ def moveDist(m, c):
 def cost(wrld, m, c, Exit, D, DMax):
 
     cost = 0
-    cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))
+
+    if c.MT == 0:
+        cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] + 7 - (18 -  c.y)))
+    if c.MT == 1:
+        cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0]  - (18 -  c.y)))
+    if c.MT == 2:
+        cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] + 7  - (c.y)))
+    if c.MT == 3:
+        cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0]  -  c.y))
     # Elen = greedyBFS.getPathLen([c.x, c.y], Exit, wrld)
     # if Elen is not None:
     #     cost += -Elen*.5
@@ -206,23 +228,45 @@ def find_actions_OpObj(wrld, OpObj):
     height = wrld.height()
 
     # check 8 connected for walls and out of bounds.
-    for i in range(3):
+    if OpObj.MT == 3 or OpObj.MT == 0:
+        for i in range(3):
 
-        i -= 1
+            i -= 1
 
-        for j in range(3):
+            for j in range(3):
 
-            j -= 1
+                j -= 1
 
-            if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
+                if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
 
-                if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
+                    if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
 
-                    if isinstance(OpObj, OpChar):
-                        actions.append(OpChar(OpObj.x + i, OpObj.y + j))
-                    elif (not (i == 0 and j == 0)):
-                        actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
+                        if isinstance(OpObj, OpChar):
+                            actions.append(OpChar(OpObj.x + i, OpObj.y + j, OpObj.MT))
+                        elif (not (i == 0 and j == 0)):
+                            actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
 
+    else:
+        for i in [2, 1, 0]:
+
+            i -= 1
+
+            for j in range(3):
+
+                j -= 1
+
+                if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
+
+                    if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i,
+                                                                                              OpObj.y + j):
+
+                        if isinstance(OpObj, OpChar):
+                            actions.append(OpChar(OpObj.x + i, OpObj.y + j, OpObj.MT))
+                        elif (not (i == 0 and j == 0)):
+                            actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
+
+    if OpObj.MT == 0 or OpObj.MT == 1:
+        actions.reverse()
     return actions
 
 
@@ -231,19 +275,21 @@ def find_actions_OpObj(wrld, OpObj):
 #takes an x,y position and a range for attack
 class OpMonster:
 
-    def __init__(self, x, y, rnge= 0):
+    def __init__(self, x, y, rnge= 0, MT = 3):
         self.x = x
         self.y = y
         self.xP = x
         self.yP = y
         self.rnge = rnge
+        self.MT = MT
 
 
 #x and y position
 class OpChar:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, MT = 3):
         self.x = x
         self.y = y
+        self.MT = MT
 
 #############################################################################################

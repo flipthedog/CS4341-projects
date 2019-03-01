@@ -1,6 +1,5 @@
 import sys
 import time
-import random
 import pathfinding as greedyBFS
 #############################################################################################
 #expectiMax(World, Character, MonsterList, [int xf, int yf], int)-> [int xOp, int yOp]
@@ -83,7 +82,7 @@ def expectiMax(wrld, Exit, Depth, TickForward = True):
 
 
         v += expVal(wrldList[1:], m2, char, Exit, 0, Depth)
-
+        print("x,y,v, yeet", char.x, char.y, v)
         if v > BestAction[0]:
             BestAction = [v, char]
 
@@ -247,7 +246,7 @@ def find_actions_OpObj(wrld, OpObj):
                             actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
 
     else:
-        for i in [2, 1, 0]:
+        for i in [2,1,0]:
 
             i -= 1
 
