@@ -16,7 +16,7 @@ class Node:
 
     def is_same(self, compare_node):
 
-        if (abs(compare_node.point.x - self.point.x) and abs(compare_node.point.y - self.point.y)):
+        if (abs(compare_node.x - self.x) and abs(compare_node.y - self.y)):
             return True
         else:
             return False
@@ -25,15 +25,15 @@ class Astar:
 
     def __init__(self, start, end, wrld):
 
-        self.width = wrld.width
-        self.height = wrld.height
+        self.width = wrld.width()
+        self.height = wrld.height()
         self.start_node = Node(start[0], start[1])
         self.end_node = Node(end[0], start[0])
         self.path = None
 
     def return_path(self):
         path = []
-        node = self.path[self.end_node]
+        node = self.path[1]
 
         path.insert(0, node)
 
@@ -54,6 +54,7 @@ class Astar:
         notEvalCheck.append(self.start_node)
 
         previous_steps = {}
+        previous_steps[1] = self.start_node
 
         g_cost = {}
         f_cost = {}
@@ -61,24 +62,26 @@ class Astar:
         g_cost[self.start_node] = 0
 
         path_found = False
-
+        current_node = None
         while not len(notEvalCheck) < 1 and not path_found:
 
             notEvaluated.sort(reverse=False, key=lambda x: x[0])
-            current_node = notEvaluated[0][1]
+            if current_node is not None:
+                prev_node = current_node
+
+            current_node = notEvaluated.pop(0)[1]
             notEvalCheck.remove(current_node)
 
             if current_node.is_same(self.end_node):
 
                 path_found = True
-
                 self.path = previous_steps
                 return self.return_path()
 
             evaluated.append(current_node)
 
-            x = current_node.point.x
-            y = current_node.point.y
+            x = current_node.x
+            y = current_node.y
 
             for i in range(3):
 
@@ -97,24 +100,24 @@ class Astar:
 
                             continue
 
-                        tentative_gcost = g_cost[current_node] + self.find_gcost(neighbor, )
+                        tentative_gcost = g_cost[current_node] + self.find_gcost(neighbor, wrld)
 
                         if not notEvalCheck.__contains__(neighbor):
 
                             g_cost[neighbor] = tentative_gcost
                             f_cost[neighbor] = g_cost[neighbor] + self.find_heuristiccost(neighbor, wrld)
 
-                            notEvaluated.put((f_cost[neighbor], neighbor))
+                            notEvaluated.append([f_cost[neighbor], neighbor])
                             notEvalCheck.append(neighbor)
 
                         elif (tentative_gcost >= g_cost[neighbor]):
 
                             continue
 
-                    previous_steps[neighbor] = current_node
+                        previous_steps[neighbor] = current_node
 
-                    g_cost[neighbor] = tentative_gcost
-                    f_cost[neighbor] = abs(g_cost[neighbor]) + abs(self.find_heuristiccost(neighbor, wrld))
+                        g_cost[neighbor] = tentative_gcost
+                        f_cost[neighbor] = abs(g_cost[neighbor]) + abs(self.find_heuristiccost(neighbor, wrld))
 
         if not path_found:
 
