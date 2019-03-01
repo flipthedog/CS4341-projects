@@ -1,20 +1,22 @@
 # This is necessary to find the main code
 import sys
-import group05.astar as astar
+import astar as astar
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
 from colorama import Fore, Back
 
-class GreedyCharacter(CharacterEntity):
+class AstarCharacter(CharacterEntity):
 
-    def __init__(self):
+    def __init__(self, name, avatar, x, y):
+        CharacterEntity.__init__(self, name, avatar, x, y)
         self.first = True
         self.path = None
 
     def do(self, wrld):
-
+        meX = wrld.me(self).x
+        meY = wrld.me(self).y
         if self.first:
             # Your code here
             exit = [0, 0]
@@ -31,19 +33,13 @@ class GreedyCharacter(CharacterEntity):
                         exit = [i, j]
 
             astar_obj = astar.Astar([meX, meY], exit, wrld)
-
+            self.path = []
             self.path = astar_obj.find_path(wrld)
-
-            node = None
-
-            while node is not exit:
-
-                node =
 
         else:
 
 
-
+            goTo = self.path.pop(0)
             #get the [x,y] coords of the next cell to go to
             goTo = astar.getNextStep([meX, meY], exit, wrld)
 
