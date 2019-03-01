@@ -17,7 +17,7 @@ from finitestatecharacterfinalS2 import FiniteStateCharacter
 wins = 0
 
 for i in range(10):
-    random.seed(1) # TODO Change this if you want different random choices
+    random.seed(i) # TODO Change this if you want different random choices
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("monster", # name
                                 "M",       # avatar
