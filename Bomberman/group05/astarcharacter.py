@@ -35,14 +35,12 @@ class AstarCharacter(CharacterEntity):
             astar_obj = astar.Astar([meX, meY], exit, wrld)
             self.path = []
             self.path = astar_obj.find_path(wrld)
-
+            self.first = False
         else:
 
-
-            goTo = self.path.pop(0)
             #get the [x,y] coords of the next cell to go to
-            goTo = astar.getNextStep([meX, meY], exit, wrld)
-
+            goTo = self.path.pop(0)
+            print("GOTO: " , goTo)
             #move in direction to get to x,y found in prev step
             self.move(-meX + goTo[0], -meY + goTo[1])
 
