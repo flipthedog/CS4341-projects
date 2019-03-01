@@ -29,6 +29,21 @@ class Astar:
         self.height = wrld.height
         self.start_node = Node(start[0], start[1])
         self.end_node = Node(end[0], start[0])
+        self.path = None
+
+    def return_path(self):
+        path = []
+        node = self.path[self.end_node]
+
+        path.insert(0, node)
+
+        while node is not None:
+
+            node = self.path[node]
+
+            path.insert(0, node)
+
+        return path
 
     def find_path(self, wrld):
         evaluated = []
@@ -57,7 +72,8 @@ class Astar:
 
                 path_found = True
 
-                return previous_steps
+                self.path = previous_steps
+                return self.return_path()
 
             evaluated.append(current_node)
 

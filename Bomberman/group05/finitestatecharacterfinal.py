@@ -144,6 +144,8 @@ class FiniteStateCharacter(CharacterEntity):
             self.move(-meX + goTo[0], -meY + goTo[1])
 
     def avoidanceNoMster(self, wrld, exit, meX, meY, bmbs, exps):
+        print("##################################################here########################################")
+        wrld1 = wrld
         # Check if there are bombs
         if bmbs and not exps and self.ticked == False:
             print("here too")
@@ -234,6 +236,6 @@ class FiniteStateCharacter(CharacterEntity):
                 # Move 1 step in the opposite direction from the explosion cell
                 self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clstOne.x), -(1/abs(meY-clstOne.y)) * abs(meY-clstOne.y))
         else:
-            print("here")
+
             # If not, continue with traditional greedy
-            self.greedy(wrld, exit, meX, meY)
+            self.greedy(wrld1, exit, meX, meY)

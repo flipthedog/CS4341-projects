@@ -13,7 +13,7 @@ sys.path.insert(1, '../groupNN')
 sys.path.insert(1, '../Scenario1Characters')
 wins = 0
 from finitestatecharacterV2Ex2 import FiniteStateCharacter
-for i in range(50):
+for i in range(10):
 
     # Create the game
     random.seed(i) # TODO Change this if you want different random choices
