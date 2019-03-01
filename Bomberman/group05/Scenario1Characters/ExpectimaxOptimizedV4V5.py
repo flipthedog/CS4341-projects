@@ -9,7 +9,7 @@ import pathfinding as greedyBFS
 #the exit) and failure (death)
 def expectiMax(wrld, Exit, Depth):
   #________________________________________________________________________________#
-    #Set up charicter placement, converting charicters to optimized charicters
+    #Set up character placement, converting charicters to optimized charicters
     Mlist = []
     t = time.time()
     for monList in wrld.monsters.values():

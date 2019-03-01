@@ -8,7 +8,7 @@ import pathfinding as greedyBFS
 #the exit) and failure (death)
 def expectiMax(wrld, Exit, Depth):
   #________________________________________________________________________________#
-    #Set up charicter placement, converting charicters to optimized charicters
+    #Set up charicter placement, converting charicters to optimized characters
     Mlist = []
     t = time.time()
     for monList in wrld.monsters.values():
@@ -17,14 +17,17 @@ def expectiMax(wrld, Exit, Depth):
     cExt = next(iter(wrld.characters.values()))[0]
 
 
+    # create character and monster objects
     c = OpChar(cExt.x, cExt.y)
     m1 = None
     m2 = None
 
     if len(Mlist)==0:
+    # if the list of monsters doesn't have any monsters on it, raise an exception (shouldn't happen)
         raise Exception('Trying to use expectimax with no monster')
     else:
-
+        # Set a danger range for the monster, depending on the type of monster, then create one
+        # or two monsters
         rnge = 1
         if Mlist[0].avatar == 'A':
             rnge = 2
@@ -40,7 +43,7 @@ def expectiMax(wrld, Exit, Depth):
 
 
   #________________________________________________________________________________#
-    #tick the world once for bombs, then generate all possible lists of movements
+    #tick the world for bombs, then generate all possible lists of movements
     #generate all worlds at begining, so it doesn't have to be constantly recreated
     wrld.character = {}
     wrldList = []
@@ -80,15 +83,16 @@ def expectiMax(wrld, Exit, Depth):
 #############################################################################################
 #expVal(OpMonster, OpMonster, OpChar, [int x, int y], int currentDepth, int Maxdepth)-> int value
 def expVal(wrldList, m, c, Exit, D, DMax):
-
+    # Complete the chance node for the expectimax algorithm
     if D == DMax or ((m is not None) and moveDist(m,c)<=1) or (m is None):
+        # if terminal, evaluate cost
         return cost(wrldList[0], m, c, Exit, D, DMax)
 
     v=0
 
     mList = find_actions_monster(wrldList[0], m, c, DMax - D)
 
-
+    # calculate expected value
     for mon in mList:
         p = 1/(len(mList))
         v = v + p * maxVal(wrldList[1:], mon, c, Exit, D + 1, DMax)
@@ -99,14 +103,16 @@ def expVal(wrldList, m, c, Exit, D, DMax):
 #############################################################################################
 #expVal(OpMonster, OpMonster, OpChar, [int x, int y], int currentDepth, int Maxdepth)-> int value
 def maxVal(wrldList, m, c, Exit, D, DMax):
-
+    # complete a max node in the expectimax algorithm
     if D == DMax or ((m is not None) and moveDist(m, c) <= 1) or (m is None):
+        # if terminal, return cost
         return cost(wrldList[0], m, c, Exit, D, DMax)
 
     v = -(sys.maxsize - 1)
 
     cList = find_actions_OpObj(wrldList[0], c)
 
+    # find the max of the chance nodes
     for char in cList:
         v = max(v, expVal(wrldList[1:], m, char, Exit, D + 1, DMax))
 
@@ -115,7 +121,7 @@ def maxVal(wrldList, m, c, Exit, D, DMax):
 
 #############################################################################################
 #moveDist(OpMonster, OpChar)-> int
-#returns the number of movements (disreguarding walls) needed to hit the charicter
+#returns the number of movements (disreguarding walls) needed to hit the character
 def moveDist(m, c):
     return abs(m.x - c.x)+ abs(m.y - c.y)
 
@@ -170,7 +176,6 @@ def find_actions_monster(wrld, m, c, DMax):
         return [mon]
 
     #if too far away to kill the charicter in depth number of moves, then the monster should be ignored.
-    #TODO make sure this doesn't cause problems
     elif moveDist(m,c) > DMax*2+1:
         return [None]
 
