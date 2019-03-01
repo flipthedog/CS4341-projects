@@ -140,7 +140,11 @@ def moveDist(m, c):
 def cost(wrld, m, c, Exit, D, DMax):
 
     cost = 0
-
+    # use nearest neighbor approxamation to find exit quadrent
+    # check 8 connected for walls and out of bounds.
+    #This mirrors the method of updating charicter moves based on the exit position
+    #reversing the order if the map is flipped over the x,y axis (Scenario 0)
+    #or changing the addition order (Scenartio 2) then flipping (Scenario 1)
     if c.MT == 0:
         cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] + 7 - (18 -  c.y)))
     if c.MT == 1:
@@ -228,6 +232,10 @@ def find_actions_OpObj(wrld, OpObj):
     height = wrld.height()
 
     # check 8 connected for walls and out of bounds.
+    # check 8 connected for walls and out of bounds.
+    #This mirrors the method of updating charicter moves based on the exit position
+    #reversing the order if the map is flipped over the x,y axis (Scenario 0)
+    #or changing the addition order (Scenartio 2) then flipping (Scenario 1)
     if OpObj.MT == 3 or OpObj.MT == 0:
         for i in range(3):
 
@@ -273,6 +281,7 @@ def find_actions_OpObj(wrld, OpObj):
 #############################################################################################
 #a version of the monster that is optimized for expectimax
 #takes an x,y position and a range for attack
+#MT is the quadrent that the exit is in, 3 default, lower right hand corner
 class OpMonster:
 
     def __init__(self, x, y, rnge= 0, MT = 3):

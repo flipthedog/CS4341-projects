@@ -65,10 +65,8 @@ def expectiMax(wrld, Exit, Depth):
 
     for char in cList:
         v = 0
-
+        #total of both char
         v += expVal(wrldList[1:], m1, char, Exit, 0, Depth)
-
-
         v += expVal(wrldList[1:], m2, char, Exit, 0, Depth)
 
         if v > BestAction[0]:
@@ -131,6 +129,7 @@ def moveDist(m, c):
 def cost(wrld, m, c, Exit, D, DMax):
 
     cost = 0
+    #cost is heuristic of distance to exit and repulsion from exit, exit[0] in both not a bug
     cost += - .5*max(abs(Exit[0] - c.x), abs(Exit[0] - c.y))
     # Elen = greedyBFS.getPathLen([c.x, c.y], Exit, wrld)
     # if Elen is not None:
@@ -146,6 +145,7 @@ def cost(wrld, m, c, Exit, D, DMax):
             return -100**(DMax+2-D)
 
         if currRange <= m.rnge+1:
+            #add cost to being close, try to be out in the open if possible
             cost += - 5 ** (1+m.rnge - moveDist(m, c))  - 1.5 ** (8 - len(find_actions_OpObj(wrld, c)))
 
 
@@ -179,6 +179,7 @@ def find_actions_monster(wrld, m, c, DMax):
     elif moveDist(m,c) > DMax*2+1:
         return [None]
 
+    #if the monster is agressive, treat it such that it persues the user if in range 2, otherwise continues in the direction it was moving.
     elif m.rnge==2:
         w = wrld.width()
         h = wrld.height()
@@ -221,7 +222,7 @@ def find_actions_OpObj(wrld, OpObj):
             if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
 
                 if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
-
+                    #if it a monster, don't concider that it will stay still
                     if isinstance(OpObj, OpChar):
                         actions.append(OpChar(OpObj.x + i, OpObj.y + j))
                     elif (not (i == 0 and j == 0)):
