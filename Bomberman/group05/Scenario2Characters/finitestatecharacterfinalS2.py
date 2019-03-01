@@ -20,7 +20,6 @@ from colorama import Fore, Back
 class FiniteStateCharacter(CharacterEntity):
     def __init__(self, name, avatar, x, y):
         CharacterEntity.__init__(self, name, avatar, x, y)
-        self.ticked = False
 
 
     def do(self, wrld):
@@ -148,98 +147,4 @@ class FiniteStateCharacter(CharacterEntity):
             #move in direction to get to x,y found in prev step
             self.move(-meX + goTo[0], -meY + goTo[1])
 
-    def avoidanceNoMster(self, wrld, exit, meX, meY, bmbs, exps):
-        print("##################################################here########################################")
-        # Check if there are bombs
-        if bmbs and not exps and self.ticked == False:
-            print("here too")
-            # Advance the bomb two ticks
-            try:
-                m = next(iter(wrld.monsters.values()))[0]
-                m.move(0,0)
-                wrld.characters = {}
-                (newwrld, events) = wrld.next()
-                (newwrld2, events) = newwrld.next()
-                wrld = newwrld2
-            except StopIteration:
-                wrld.characters = {}
-                (newwrld, events) = wrld.next()
-                (newwrld2, events) = newwrld.next()
-                wrld = newwrld2
-            self.ticked = True
-            # See if there are explosions now
-            exps = []
-
-            # All of the explosions
-            e = wrld.explosions.items()
-
-            # Filtering only close monsters
-            for x,exp in e:
-                if self.MoveDist([meX, meY], [exp.x, exp.y]) <= 1:
-                    exps.append(exp)
-            if not exps:
-                exps = None
-        # Check if there are any explosions
-        if bmbs and not exps and self.ticked == True:
-            print("here too")
-            # Advance the bomb two ticks
-            try:
-                m = next(iter(wrld.monsters.values()))[0]
-                m.move(0,0)
-                wrld.characters = {}
-                (newwrld, events) = wrld.next()
-                wrld = newwrld
-            except StopIteration:
-                wrld.characters = {}
-                (newwrld, events) = wrld.next()
-                wrld = newwrld
-            self.ticked = False
-            # See if there are explosions now
-            exps = []
-
-            # All of the explosions
-            e = wrld.explosions.items()
-
-            # Filtering only close monsters
-            for x,exp in e:
-                if self.MoveDist([meX, meY], [exp.x, exp.y]) <= 1:
-                    exps.append(exp)
-            if not exps:
-                exps = None
-        if exps is not None:
-            # If so,
-            # Figure out which explosion cell is the closest
-            clstOne = 0
-            clstOneDist = 5000
-            for e in exps:
-                dist = abs(meX - e.x) + abs(meY - e.y)
-                if  dist < clstOneDist:
-                    clstOne = e
-                    clstOneDist = dist
-            if abs(meX-clstOne.x) == 0 and abs(meY-clstOne.y) == 0:
-                # Move to the closest open space
-                moveTo = ()
-                for i in range(-1, 1):
-                    for j in range(-1, 1):
-                        # If not current position
-                        if i != 0 and j != 0:
-                            # If within bounds:
-                            if not (meX + i >= wrld.width() or meX + i < 0 or meY + j >= wrld.height() or meY + j < 0):
-                                if not wrld.explosion_at(meX + i, meY + j) and not wrld.wall_at(meX + i, meY + j):
-                                        # Save the space
-                                        moveTo = (i, j)
-                # Move to last saved space
-                self.move(moveTo[0], moveTo[1])
-            elif abs(meX-clstOne.x) == 0:
-                # Move 1 step in the opposite direction from the explosion cell
-                self.move(0, -(1/abs(meY-clstOne.y)) * abs(meY-clstOne.y))
-            elif abs(meY-clstOne.y) == 0:
-                # Move 1 step in the opposite direction from the explosion cell
-                self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clstOne.x), 0)
-            else:
-                # Move 1 step in the opposite direction from the explosion cell
-                self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clstOne.x), -(1/abs(meY-clstOne.y)) * abs(meY-clstOne.y))
-        else:
-
-            # If not, continue with traditional greedy
-            self.greedy(wrld, exit, meX, meY)
+    
