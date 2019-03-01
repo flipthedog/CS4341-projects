@@ -46,11 +46,12 @@ class Astar:
 
         while current_node is not None:
             if current_node is not None:
-                print("Pulled", current_node.x, current_node.y)
+                #print("Pulled", current_node.x, current_node.y)
                 path.insert(0, [current_node.x, current_node.y])
                 current_node = current_node.parent
             else:
-                print("None")
+                pass
+                #print("None")
         return path
 
     def find_path(self, wrld):
@@ -113,8 +114,8 @@ class Astar:
                                 if not self.hasnode(neighbor, notEvaluated):
                                     g_cost[neighbor] = tentative_gcost
                                     f_cost[neighbor] = g_cost[neighbor] + self.find_heuristiccost(neighbor, wrld)
-                                    print("Created node: ", x + i, y + j)
-                                    print("\t This is fcost: ", f_cost[neighbor])
+                                    #print("Created node: ", x + i, y + j)
+                                    #print("\t This is fcost: ", f_cost[neighbor])
                                     neighbor.parent = copy.deepcopy(current_node)
                                     notEvaluated.append([f_cost[neighbor], neighbor])
 
@@ -145,11 +146,26 @@ class Astar:
         return False
 
     def find_gcost(self, node, wrld):
-        return 1
+        cost = 0
+
+        if wrld.wall_at(node.x,node.y):
+            cost += 100
+
+        return cost
 
     def find_heuristiccost(self, node, wrld):
+        cost = 0
 
-        return self.euclidian_distance(node, self.end_node)
+        cost += self.euclidian_distance(node, self.end_node)
+
+        monster_weight = 10
+
+        for x, mn in wrld.monsters.items():
+
+            for m in mn:
+                cost -= (monster_weight * self.euclidian_distance(m, node))
+
+        return cost
 
     def other_distance(self, node):
 

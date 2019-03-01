@@ -17,31 +17,31 @@ class AstarCharacter(CharacterEntity):
     def do(self, wrld):
         meX = wrld.me(self).x
         meY = wrld.me(self).y
-        if self.first:
-            # Your code here
-            exit = [0, 0]
-            #get current position
-            meX = wrld.me(self).x
-            meY = wrld.me(self).y
 
-            #check every gridcell for the exit. Uses the last exit found as the "goal"
-            for i in range(wrld.width()):
+        # Your code here
+        exit = [0, 0]
+        #get current position
+        meX = wrld.me(self).x
+        meY = wrld.me(self).y
 
-                for j in range(wrld.height()):
+        #check every gridcell for the exit. Uses the last exit found as the "goal"
+        for i in range(wrld.width()):
 
-                    if wrld.exit_at(i, j):
-                        exit = [i, j]
+            for j in range(wrld.height()):
 
-            astar_obj = astar.Astar([meX, meY], exit, wrld)
-            self.path = []
-            self.path = astar_obj.find_path(wrld)
-            self.first = False
-        else:
+                if wrld.exit_at(i, j):
+                    exit = [i, j]
 
-            #get the [x,y] coords of the next cell to go to
-            goTo = self.path.pop(0)
-            print("GOTO: " , goTo)
-            #move in direction to get to x,y found in prev step
-            self.move(-meX + goTo[0], -meY + goTo[1])
+        astar_obj = astar.Astar([meX, meY], exit, wrld)
+        self.path = []
+        self.path = astar_obj.find_path(wrld)
+        self.first = False
+
+
+        #get the [x,y] coords of the next cell to go to
+        goTo = self.path.pop(0)
+        print("GOTO: " , goTo)
+        #move in direction to get to x,y found in prev step
+        self.move(-meX + goTo[0], -meY + goTo[1])
 
         
