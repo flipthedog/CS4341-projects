@@ -14,9 +14,9 @@ class gridcell():
 #Given a start tuple [x,y], end tuple [x,y] and the world
 #returns a tuple [x,y] that is the next position to move to using the current algorithm
 #Currently GREEDYBFS
-def getNextStep(start, end, wrld):
+def getNextStep(start, end, wrld, badPositions):
     #Call pathing algorithm, returns Gridcell with complete path to be reconstructed
-    pathNode = greedyBFS(start, end, wrld)
+    pathNode = greedyBFS(start, end, wrld, badPositions)
 
     prev = pathNode
 
@@ -34,7 +34,7 @@ def getNextStep(start, end, wrld):
 #Given a start tuple (usually players's start) [x,y], end tuple [x,y] and the world
 #Return a gridcell at the goal. The <gridcell>.camefrom can be used to assemble the path to the goal
 #uses a greedy BFS with a manhattan distance as a heuristic
-def greedyBFS(start, end, wrld):
+def greedyBFS(start, end, wrld, badPositions):
     #List of evaluated [x,y] pairs
     evaluated = []
 
@@ -68,34 +68,66 @@ def greedyBFS(start, end, wrld):
         x = popped.current[0]
         y = popped.current[1]
 
-        #check 8 connected. The current position is already in evaluated, so checking the current position
-        #has no effect, not slow enought to require optimizeation
-        for i in range(3):
+        if badPositions is not None:
+            #check 8 connected. The current position is already in evaluated, so checking the current position
+            #has no effect, not slow enought to require optimizeation
+            for i in range(3):
 
-            i -= 1
+                i -= 1
 
-            for j in range(3):
+                for j in range(3):
 
-                j -= 1
+                    j -= 1
 
-                #if the postition is in world bounds
-                if not (x + i >= width or x + i < 0 or y + j >= height or y + j < 0):
-                    notEvalFlag = True
-                    for point in evaluated:
-                        if point[0] == x + i and point[1] == y + j:
-                            notEvalFlag= False
-                    for pointCell in  notEvaluated:
-                        point = pointCell[1].current
-                        if point[0] == x + i and point[1] == y + j:
-                            notEvalFlag= False
-                    #if the checked position has not already been checked, and there is not a wall at the location
-                    if notEvalFlag and not wrld.wall_at(x + i, y + j):
-                         #and not wrld.explosion_at(x + i, y + j):
-                        #create a new gridcell, with the previous postition being the gridcell used in this for for loop
-                        #to reach the position
-                        current = gridcell([x + i, y + j], popped)
-                        #append to the fronter
-                        notEvaluated.append((manhattandist(current, endcell), current))
+
+                    #if the postition is in world bounds
+                    if not (x + i >= width or x + i < 0 or y + j >= height or y + j < 0):
+                        notEvalFlag = True
+                        for point in evaluated:
+                            if point[0] == x + i and point[1] == y + j:
+                                notEvalFlag= False
+                        for pointCell in  notEvaluated:
+                            point = pointCell[1].current
+                            if point[0] == x + i and point[1] == y + j:
+                                notEvalFlag= False
+                        #if the checked position has not already been checked, and there is not a wall at the location
+                        if notEvalFlag and not wrld.wall_at(x + i, y + j) and not ([x + i, y + j] in badPositions):
+                             #and not wrld.explosion_at(x + i, y + j):
+                            #create a new gridcell, with the previous postition being the gridcell used in this for for loop
+                            #to reach the position
+                            current = gridcell([x + i, y + j], popped)
+                            #append to the fronter
+                            notEvaluated.append((manhattandist(current, endcell), current))
+            else:
+                #check 8 connected. The current position is already in evaluated, so checking the current position
+                #has no effect, not slow enought to require optimizeation
+                for i in range(3):
+
+                    i -= 1
+
+                    for j in range(3):
+
+                        j -= 1
+
+
+                        #if the postition is in world bounds
+                        if not (x + i >= width or x + i < 0 or y + j >= height or y + j < 0):
+                            notEvalFlag = True
+                            for point in evaluated:
+                                if point[0] == x + i and point[1] == y + j:
+                                    notEvalFlag= False
+                            for pointCell in  notEvaluated:
+                                point = pointCell[1].current
+                                if point[0] == x + i and point[1] == y + j:
+                                    notEvalFlag= False
+                            #if the checked position has not already been checked, and there is not a wall at the location
+                            if notEvalFlag and not wrld.wall_at(x + i, y + j):
+                                 #and not wrld.explosion_at(x + i, y + j):
+                                #create a new gridcell, with the previous postition being the gridcell used in this for for loop
+                                #to reach the position
+                                current = gridcell([x + i, y + j], popped)
+                                #append to the fronter
+                                notEvaluated.append((manhattandist(current, endcell), current))
 
     a = 0
 

@@ -54,12 +54,12 @@ class FiniteStateCharacter(CharacterEntity):
 
         if isThereBomb and isThereMonster and isThereExplosion:
             # There at least 1 bomb, 1 monster, and 1 explosion within the danger zone
-            self.expectimax(wrld, exit, meX, meY)
+            self.bombAvoidance(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster:
-            self.expectimax(wrld, exit, meX, meY)
-        # elif isThereBomb and isThereExplosion:
-        #     # There is both at least 1 bomb and 1 explosion within 2 steps
-        #     self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
+            self.bombAvoidance(wrld, exit, meX, meY)
+        elif isThereBomb and isThereExplosion:
+            # There is both at least 1 bomb and 1 explosion within 2 steps
+            self.bombAvoidance(wrld, exit, meX, meY)
         elif isThereExplosion and isThereMonster:
             # There is both at least 1 explosion and 1 monster within 2 steps
             self.expectimax(wrld, exit, meX, meY, False)
@@ -67,7 +67,7 @@ class FiniteStateCharacter(CharacterEntity):
             # There is at least 1 monster within 2 steps
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
-            self.expectimax(wrld, exit, meX, meY)
+            self.bombAvoidance(wrld, exit, meX, meY)
         #     # There is at least 1 bomb within 2 steps
         #     self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
         elif isThereExplosion:
@@ -112,58 +112,59 @@ class FiniteStateCharacter(CharacterEntity):
             # Filtering only close monsters
             for monstr in m:
                 for ms in monstr:
-                    if self.MoveDist([meX, meY], [ms.x, ms.y]) <= 2:
+                    if self.MoveDist([meX, meY], [ms.x, ms.y]) <= 10:
                         return True
                 return False
 
-    def expectimax(self, wrld, exit, meX, meY, TickForwards = True, badPositions, timeLeft):
+    def expectimax(self, wrld, exit, meX, meY, TickForwards = True, badPositions = None, timeLeft = 0):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.expectiMax(wrld, exit, 2, TickForwards, badPositions, timeLeft)
+        goTo = EM.expectiMax(wrld, exit, 8, TickForwards, badPositions, timeLeft)
         if  goTo[0] == exit[0] and goTo[1] == exit[1]:
             raise ValueError
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
 
-    def greedy(self, wrld, exit, meX, meY):
+    def greedy(self, wrld, exit, meX, meY, badPositions=None):
         # Returns true if the character can be moved, false if not
 
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = greedyBFS.getNextStep([meX, meY], exit, wrld)
+        goTo = greedyBFS.getNextStep([meX, meY], exit, wrld, badPositions)
 
         if goTo is None:
             # TODO: Improve bomb placement and pathfinding combinations
-            goTo = conn4.getNextStep([meX, meY], exit, wrld)
-            if goTo[0] == exit[0] and goTo[1] == exit[1]:
-                raise ValueError
+            goTo = conn4.getNextStep([meX, meY], exit, wrld, badPositions)
+            # if goTo[0] == exit[0] and goTo[1] == exit[1]:
+            #     raise ValueError
             if wrld.wall_at(goTo[0],goTo[1]):
                 self.place_bomb()
             else:
                 self.move(-meX + goTo[0], -meY + goTo[1])
         else:
-            if goTo[0] == exit[0] and goTo[1] == exit[1]:
-                raise ValueError
+            # if goTo[0] == exit[0] and goTo[1] == exit[1]:
+            #     raise ValueError
             #move in direction to get to x,y found in prev step
             self.move(-meX + goTo[0], -meY + goTo[1])
 
-    def bombAvoidance(self, wrld, meX, meY):
+    def bombAvoidance(self, wrld, exit, meX, meY):
         # Get the bomb object
-        thisBomb = next(iter(wrld.bombs.values()))[0]
+        bomb = next(iter(wrld.bombs.values()))
+        print(bomb.x, bomb.y)
 
         # Figure out the amount of time left on the bomb before it explodes
-        timeLeft = thisBomb.timer
+        timeLeft = bomb.timer
         # Figure out how far the explosion will reach when it occurs
         bRange = wrld.expl_range
         # Figure out how far away from the explosion you are using euclidean distance
-        manhattan = meX-thisBomb.x+ meY-thisBomb.y
+        manhattan = meX-bomb.x+ meY-bomb.y
         # Figure if on the same x or y as the bomb
         vert = False
         if bomb.x == meX:
             vert = True
         horz = False
-        if bomb.y = meY:
+        if bomb.y == meY:
             horz = True
         if meX == bomb.x and meY == bomb.y:
             # Use the movement algorithms but send in the positions that the bomb will explode in so that the algorithm
@@ -175,11 +176,8 @@ class FiniteStateCharacter(CharacterEntity):
                 badPositions.append([bomb.x-1-i,bomb.y])
                 badPositions.append([bomb.x,bomb.y+1+i])
                 badPositions.append([bomb.x,bomb.y-1-i])
-            # Then send to expectimax or greedy/astar
-            if self.isThereMonster(wrld, meX, meY):
-                self.expectimax(wrld, exit, meX, meY, False, badPositions, timeLeft)
-            else:
-                self.greedy(wrld, exit, meX, meY, False, badPositions, timeLeft)
+            # Then send to expectimax
+            self.expectimax(wrld, exit, meX, meY, False, badPositions, timeLeft)
         elif manhattan <= bRange and (horz or vert):
             # then you are still within the range of the bomb
             #TODO: Add in the intitial run away case
@@ -231,4 +229,4 @@ class FiniteStateCharacter(CharacterEntity):
             if self.isThereMonster(wrld, meX, meY):
                 self.expectimax(wrld, exit, meX, meY, False, badPositions, timeLeft)
             else:
-                self.greedy(wrld, exit, meX, meY, False, badPositions, timeLeft)
+                self.greedy(wrld, exit, meX, meY, badPositions)

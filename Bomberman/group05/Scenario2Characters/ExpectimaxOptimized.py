@@ -6,7 +6,7 @@ import pathfinding as greedyBFS
 #Given a world, ticked for any bombs, a character, a monsterlist of size 1 or 2 (as there is a max of 2 monsters)
 #a positional tuple of the exit, and the max depth to reach. The depth will early exit in the case of succsess (reaching
 #the exit) and failure (death)
-def expectiMax(wrld, Exit, Depth, TickForward = True):
+def expectiMax(wrld, Exit, Depth, TickForward = True, badPositions = None, timeLeft = 0):
   #________________________________________________________________________________#
     #Set up charicter placement, converting charicters to optimized charicters
     Mlist = []
@@ -15,7 +15,6 @@ def expectiMax(wrld, Exit, Depth, TickForward = True):
         for mon in monList:
             Mlist.append(mon)
     cExt = next(iter(wrld.characters.values()))[0]
-
 
     c = OpChar(cExt.x, cExt.y)
     m1 = None
@@ -50,7 +49,10 @@ def expectiMax(wrld, Exit, Depth, TickForward = True):
         (newwrld, events) = wrld.next()
         wrldList.append(newwrld)
 
-    cList = find_actions_OpObj(wrldList[0], c)
+    if badPositions is None:
+        cList = find_actions_OpObj(wrldList[0], c)
+    else:
+        cList = find_actions_OpObj(wrldList[0], c, badPositions, timeLeft)
     # m1List = find_actions_monster(wrldList[0], m1, c, Depth)
     # m2List = find_actions_monster(wrldList[0], m2, c, Depth)
 
@@ -199,30 +201,50 @@ def find_actions_monster(wrld, m, c, DMax):
 #############################################################################################
 # find_actions_Char(World, OpObj)-> List[OpChar]
 # given the world and a charicter, returns a list of Charicter objects in all new positions
-def find_actions_OpObj(wrld, OpObj):
+def find_actions_OpObj(wrld, OpObj, badPositions=None, timer=0):
     actions = []
 
     width = wrld.width()
     height = wrld.height()
 
-    # check 8 connected for walls and out of bounds.
-    for i in range(3):
+    if badPositions is None or timer is 0:
+        # check 8 connected for walls and out of bounds.
+        for i in range(3):
 
-        i -= 1
+            i -= 1
 
-        for j in range(3):
+            for j in range(3):
 
-            j -= 1
+                j -= 1
 
-            if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
+                if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
 
-                if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
+                    if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
 
-                    if isinstance(OpObj, OpChar):
-                        actions.append(OpChar(OpObj.x + i, OpObj.y + j))
-                    elif (not (i == 0 and j == 0)):
-                        actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
+                        if isinstance(OpObj, OpChar):
+                            actions.append(OpChar(OpObj.x + i, OpObj.y + j))
+                        elif (not (i == 0 and j == 0)):
+                            actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
+        else:
+            # check 8 connected for walls and out of bounds.
+            for i in range(3):
 
+                i -= 1
+
+                for j in range(3):
+
+                    j -= 1
+
+                    if not (OpObj.x + i >= width or OpObj.x + i < 0 or OpObj.y + j >= height or OpObj.y + j < 0):
+
+                        if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j) and not [OpObj.x + i, OpObj.y + j] in badPositions:
+
+                            if isinstance(OpObj, OpChar):
+                                actions.append(OpChar(OpObj.x + i, OpObj.y + j))
+                            elif (not (i == 0 and j == 0)):
+                                actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
+
+    timer = timer - 1
     return actions
 
 
