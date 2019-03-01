@@ -1,4 +1,5 @@
 import copy
+import math
 
 class Node:
 
@@ -46,7 +47,7 @@ class Astar:
         while current_node is not None:
             if current_node is not None:
                 print("Pulled", current_node.x, current_node.y)
-                path.insert(0,[current_node.x, current_node.y])
+                path.insert(0, [current_node.x, current_node.y])
                 current_node = current_node.parent
             else:
                 print("None")
@@ -56,8 +57,6 @@ class Astar:
         evaluated = []
         notEvaluated = [[self.start_node.f_cost, self.start_node]]
         evaluated.append(self.start_node)
-        notEvalCheck = []
-        notEvalCheck.append(self.start_node)
 
         previous_steps = {}
         previous_steps[1] = self.start_node
@@ -70,6 +69,7 @@ class Astar:
         path_found = False
         current_node = None
         prev_node = None
+
         while not len(notEvaluated) <= 0 and not path_found:
 
             notEvaluated.sort(reverse=False, key=lambda x: x[0])
@@ -88,42 +88,44 @@ class Astar:
 
                 i -= 1
 
-
                 for j in range(3):
 
                     j -= 1
 
                     # print(i,j)
 
-                    # if the postition is in world bounds
+                    # if the position is in world bounds
                     if not (x + i >= self.width or x + i < 0 or y + j >= self.height or y + j < 0):
-                        if not (j != 0 and i != 0) and not wrld.wall_at(x + i, y + j):
+                        if not wrld.wall_at(x + i, y + j):
 
                             neighbor = Node(x + i, y + j)
 
                             if neighbor in evaluated:
-                                continue
+                                pass
+                            else:
 
-                            neighbor.parent = copy.deepcopy(current_node)
+                                if neighbor.x == self.end_node.x and neighbor.y == self.end_node.y:
+                                    self.end_node.parent = copy.deepcopy(current_node)
 
-                            if neighbor.x == self.end_node.x and neighbor.y == self.end_node.y:
-                                self.end_node.parent = copy.deepcopy(current_node)
-                            tentative_gcost = g_cost[current_node] + self.find_gcost(neighbor, wrld)
+                                tentative_gcost = g_cost[current_node] + self.find_gcost(neighbor, wrld)
+                                tentative_fcost = tentative_gcost + self.find_heuristiccost(neighbor, wrld)
 
-                            if not self.hasnode(neighbor, notEvaluated):
+                                if not self.hasnode(neighbor, notEvaluated):
+                                    g_cost[neighbor] = tentative_gcost
+                                    f_cost[neighbor] = g_cost[neighbor] + self.find_heuristiccost(neighbor, wrld)
+                                    print("Created node: ", x + i, y + j)
+                                    print("\t This is fcost: ", f_cost[neighbor])
+                                    neighbor.parent = copy.deepcopy(current_node)
+                                    notEvaluated.append([f_cost[neighbor], neighbor])
+
+                                elif (tentative_gcost >= g_cost[neighbor]):
+                                    continue
+
+                                previous_steps[neighbor] = current_node
+                                neighbor.parent = copy.deepcopy(current_node)
+
                                 g_cost[neighbor] = tentative_gcost
-                                f_cost[neighbor] = g_cost[neighbor] + self.find_heuristiccost(neighbor, wrld)
-
-                                notEvaluated.append([f_cost[neighbor], neighbor])
-
-                            elif (tentative_gcost >= g_cost[neighbor]):
-                                continue
-
-                            previous_steps[neighbor] = current_node
-                            neighbor.parent = copy.deepcopy(current_node)
-
-                            g_cost[neighbor] = tentative_gcost
-                            f_cost[neighbor] = abs(g_cost[neighbor]) + abs(self.find_heuristiccost(neighbor, wrld))
+                                f_cost[neighbor] = abs(g_cost[neighbor]) + abs(self.find_heuristiccost(neighbor, wrld))
 
         if not path_found:
 
@@ -146,7 +148,16 @@ class Astar:
         return 1
 
     def find_heuristiccost(self, node, wrld):
-        return self.manhattan_distance(node, self.end_node)
+
+        return self.euclidian_distance(node, self.end_node)
+
+    def other_distance(self, node):
+
+        return max(abs(node.x - self.end_node.x), abs(node.y - self.end_node.y))
+
+    def euclidian_distance(self, node_1, node_2):
+
+        return math.sqrt((node_1.x - node_2.x)**2 + (node_1.y - node_2.y)**2)
 
     def manhattan_distance(self,node_1, node_2):
 
