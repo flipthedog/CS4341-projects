@@ -1,5 +1,6 @@
 import sys
 import time
+import random
 import pathfinding as greedyBFS
 #############################################################################################
 #expectiMax(World, Character, MonsterList, [int xf, int yf], int)-> [int xOp, int yOp]
@@ -219,7 +220,8 @@ def find_actions_OpObj(wrld, OpObj):
                 if not (wrld.wall_at(OpObj.x + i, OpObj.y + j)) and not wrld.explosion_at(OpObj.x + i, OpObj.y + j):
 
                     if isinstance(OpObj, OpChar):
-                        actions.append(OpChar(OpObj.x + i, OpObj.y + j))
+                        if not (i == 0 and j == 0) or (random.random() > .01):
+                            actions.append(OpChar(OpObj.x + i, OpObj.y + j))
                     elif (not (i == 0 and j == 0)):
                         actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
 

@@ -21,7 +21,7 @@ for i in range(10):
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("monster", # name
                                 "M",       # avatar
-                                3, 9       # position
+                                3, 9      # position
     ))
 
     # TODO Add your character
