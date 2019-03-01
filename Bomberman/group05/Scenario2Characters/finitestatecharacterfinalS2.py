@@ -57,20 +57,21 @@ class FiniteStateCharacter(CharacterEntity):
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster:
             self.expectimax(wrld, exit, meX, meY)
-        elif isThereBomb and isThereExplosion:
-            # There is both at least 1 bomb and 1 explosion within 2 steps
-            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
+        # elif isThereBomb and isThereExplosion:
+        #     # There is both at least 1 bomb and 1 explosion within 2 steps
+        #     self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
         elif isThereExplosion and isThereMonster:
             # There is both at least 1 explosion and 1 monster within 2 steps
-            self.expectimax(wrld, exit, meX, meY)
+            self.expectimax(wrld, exit, meX, meY, False)
         elif isThereMonster:
             # There is at least 1 monster within 2 steps
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
-            # There is at least 1 bomb within 2 steps
-            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
+            self.expectimax(wrld, exit, meX, meY)
+        #     # There is at least 1 bomb within 2 steps
+        #     self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
         elif isThereExplosion:
-            self.avoidanceNoMster(wrld, exit, meX, meY, isThereBomb, isThereExplosion)
+            self.expectimax(wrld, exit, meX, meY, False)
         else:
             # There is no danger nearby
             self.greedy(wrld, exit, meX, meY)
@@ -106,21 +107,21 @@ class FiniteStateCharacter(CharacterEntity):
 
     def isThereMonster(self, wrld, meX, meY):
             # All of the monsters
-            m = wrld.monsters.items()
+            m = wrld.monsters.values()
 
             # Filtering only close monsters
-            for x,monstr in m:
-                ms = monstr
+            for monstr in m:
                 for ms in monstr:
                     if self.MoveDist([meX, meY], [ms.x, ms.y]) <= 2:
                         return True
                 return False
 
-    def expectimax(self, wrld, exit, meX, meY):
+    def expectimax(self, wrld, exit, meX, meY, TickForwards = True):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.expectiMax(wrld, exit, 2)
-
+        goTo = EM.expectiMax(wrld, exit, 2, TickForwards)
+        if  goTo[0] == exit[0] and goTo[1] == exit[1]:
+            raise ValueError
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
@@ -135,15 +136,20 @@ class FiniteStateCharacter(CharacterEntity):
         if goTo is None:
             # TODO: Improve bomb placement and pathfinding combinations
             goTo = conn4.getNextStep([meX, meY], exit, wrld)
+            if goTo[0] == exit[0] and goTo[1] == exit[1]:
+                raise ValueError
             if wrld.wall_at(goTo[0],goTo[1]):
                 self.place_bomb()
             else:
                 self.move(-meX + goTo[0], -meY + goTo[1])
         else:
+            if goTo[0] == exit[0] and goTo[1] == exit[1]:
+                raise ValueError
             #move in direction to get to x,y found in prev step
             self.move(-meX + goTo[0], -meY + goTo[1])
 
     def avoidanceNoMster(self, wrld, exit, meX, meY, bmbs, exps):
+        print("##################################################here########################################")
         # Check if there are bombs
         if bmbs and not exps and self.ticked == False:
             print("here too")
@@ -234,6 +240,6 @@ class FiniteStateCharacter(CharacterEntity):
                 # Move 1 step in the opposite direction from the explosion cell
                 self.move(-(1/abs(meX-clstOne.x)) * abs(meX-clstOne.x), -(1/abs(meY-clstOne.y)) * abs(meY-clstOne.y))
         else:
-            print("here")
+
             # If not, continue with traditional greedy
             self.greedy(wrld, exit, meX, meY)
