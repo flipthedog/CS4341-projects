@@ -13,7 +13,7 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 sys.path.insert(1, '../groupNN')
 sys.path.insert(1, '../Scenario1Characters')
 from finitestatecharacterV5Ex2 import FiniteStateCharacter
-
+wins = 0
 # Create the game
 for i in range(12):
     random.seed(i) # TODO Change this if you want different random choices
@@ -35,4 +35,8 @@ for i in range(12):
     ))
 
     # Run!
-    g.go()
+    try:
+        g.go()
+    except ValueError:
+        wins += 1
+print(wins)
