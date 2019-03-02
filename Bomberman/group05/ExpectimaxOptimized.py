@@ -268,7 +268,8 @@ def find_actions_OpObj(wrld, OpObj):
                                                                                               OpObj.y + j):
 
                         if isinstance(OpObj, OpChar):
-                            actions.append(OpChar(OpObj.x + i, OpObj.y + j, OpObj.MT))
+                            if not (i == 0 and j == 0) or (random.random() > .0025):
+                                actions.append(OpChar(OpObj.x + i, OpObj.y + j, OpObj.MT))
                         elif (not (i == 0 and j == 0)):
                             actions.append(OpMonster(OpObj.x + i, OpObj.y + j))
 

@@ -120,8 +120,7 @@ class FiniteStateCharacter(CharacterEntity):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
         goTo = EM.expectiMax(wrld, exit, 5, TickForwards)
-        if  goTo[0] == exit[0] and goTo[1] == exit[1]:
-            raise ValueError
+
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
@@ -136,15 +135,11 @@ class FiniteStateCharacter(CharacterEntity):
         if goTo is None:
             # TODO: Improve bomb placement and pathfinding combinations
             goTo = conn4.getNextStep([meX, meY], exit, wrld)
-            if goTo[0] == exit[0] and goTo[1] == exit[1]:
-                raise ValueError
             if wrld.wall_at(goTo[0],goTo[1]):
                 self.place_bomb()
             else:
                 self.move(-meX + goTo[0], -meY + goTo[1])
         else:
-            if goTo[0] == exit[0] and goTo[1] == exit[1]:
-                raise ValueError
             #move in direction to get to x,y found in prev step
             self.move(-meX + goTo[0], -meY + goTo[1])
 

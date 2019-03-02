@@ -207,8 +207,7 @@ class FiniteStateCharacter(CharacterEntity):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
         goTo = EM.expectiMax(wrld, exit, 5)
-        if  goTo[0] == exit[0] and goTo[1] == exit[1]:
-            raise ValueError
+
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
@@ -217,7 +216,6 @@ class FiniteStateCharacter(CharacterEntity):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
         goTo = greedyBFS.getNextStep([meX, meY], exit, wrld)
-        if  goTo[0] == exit[0] and goTo[1] == exit[1]:
-            raise ValueError
+
         #move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
